@@ -29,31 +29,55 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/alert_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="all"
+            android:textColor="@color/White" />
+
+        <TextView
+            android:id="@+id/alert_instruction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="all"
+            android:textColor="@color/White"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/alert_web"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:textColor="@color/White"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/alert_contact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="all"
+            android:gravity="bottom"
+            android:textColor="@color/White"
+            android:visibility="gone" />
+
+        <TextView
             android:id="@+id/alert_event"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Event"
             android:textColor="@color/White" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/alert_sender"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:textColor="@color/White" />
 
-            <TextView
-                android:id="@+id/alert_sender_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sender: "
-                android:textColor="@color/White" />
-
-            <TextView
-                android:id="@+id/alert_sender"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TextView"
-                android:textColor="@color/White" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/alert_senderName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/White"
+            android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -71,7 +95,6 @@
                 android:id="@+id/alert_urgency"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Unknown"
                 android:textColor="@color/White" />
         </LinearLayout>
 
@@ -91,7 +114,6 @@
                 android:id="@+id/alert_severity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Unknown"
                 android:textColor="@color/White" />
         </LinearLayout>
 
@@ -111,69 +133,27 @@
                 android:id="@+id/alert_certainty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Unknown"
                 android:textColor="@color/White" />
         </LinearLayout>
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/alert_effective"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-
-            <TextView
-                android:id="@+id/alert_effective_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Effective: "
-                android:textColor="@color/White" />
-
-            <TextView
-                android:id="@+id/alert_effective"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-            </TextView>
-        </LinearLayout>
+            android:textColor="@color/White" >
+        </TextView>
 
         <TextView
-            android:id="@+id/alert_desc_label"
+            android:id="@+id/alert_expires"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="\nDescription"
-            android:textColor="@color/White" />
-
-        <TextView
-            android:id="@+id/alert_desc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView"
-            android:textColor="@color/White" />
-
-        <TextView
-            android:id="@+id/alert_instruction_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="\nInstruction"
-            android:textColor="@color/White" />
-
-        <TextView
-            android:id="@+id/alert_instruction"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView"
-            android:textColor="@color/White" />
-
-        <TextView
-            android:id="@+id/alert_areadesc_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="\nAffected Area"
-            android:textColor="@color/White" />
+            android:textColor="@color/White" >
+        </TextView>
 
         <TextView
             android:id="@+id/alert_areadesc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TextView"
             android:textColor="@color/White" />
 
         <!-- TODO: MapFragment - kept getting 'IllegalArgumentException: Binary XML file Duplicate id, tag null, or parent id with another fragment' since SupportMapFragment is already instantiated in MainActivity. hmmmm. -->

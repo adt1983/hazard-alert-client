@@ -1,5 +1,6 @@
 package com.hazardalert;
 
+import java.text.DateFormat;
 import java.util.Date;
 
 import android.content.Context;
@@ -8,6 +9,7 @@ import android.location.Location;
 
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.publicalerts.cap.Alert;
+import com.google.publicalerts.cap.Area;
 import com.google.publicalerts.cap.Info;
 import com.google.publicalerts.cap.Info.Certainty;
 import com.google.publicalerts.cap.Info.Severity;
@@ -135,6 +137,11 @@ public class Hazard {
 		return getAlert().getInfo(0);
 	}
 
+	public Area getArea() {
+		new Assert(1 == getInfo().getAreaCount());
+		return getInfo().getArea(0);
+	}
+
 	public Date getExpires() {
 		return expires;
 	}
@@ -192,6 +199,22 @@ public class Hazard {
 			}
 		}
 		return false;
+	}
+
+	public String getEffectiveString() {
+		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+		return df.format(effective);
+	}
+
+	public String getExpiresString() {
+		/*
+		 * Locale.getDefault()
+		SimpleDateFormat dateFormatter1 = new SimpleDateFormat("dd MMM yyyy");
+		SimpleDateFormat dateFormatter2 = new SimpleDateFormat("hh:mm:ss");
+		return dateFormatter1.format(expires) + " at " + dateFormatter2.format(expires);
+		 */
+		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+		return df.format(expires);
 	}
 
 	/*
