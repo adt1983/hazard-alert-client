@@ -8,14 +8,21 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -37,6 +44,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.publicalerts.cap.Alert;
 import com.hazardalert.common.AlertFilter;
+import com.hazardalert.common.Assert;
 import com.hazardalert.common.Bounds;
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -53,11 +61,36 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 
 	private final Envelope subEnv = new Envelope();
 
-	class SubscriptionManager extends AsyncTask<Void, Void, Void> {
+	AlertDialog rpcSpinner;
+
+	AlertDialog loadSpinner;
+
+	class SubscriptionManager extends AsyncTask<Void, Void, Boolean> {
 		@Override
-		protected Void doInBackground(Void... params) {
+		protected void onPreExecute() {
+			super.onPreExecute();
+			if (null != rpcSpinner) {
+				rpcSpinner.show();
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			if (null != rpcSpinner) {
+				rpcSpinner.dismiss();
+			}
+			if (result.booleanValue()) {
+				if (null != loadSpinner) {
+					loadSpinner.show();
+				}
+			}
+			super.onPostExecute(result);
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
 			if (subEnv.contains(bounds)) {
-				return null;
+				return Boolean.FALSE;
 			}
 			Context ctx = getActivity().getApplicationContext();
 			AlertFilter filter = new AlertFilter().setInclude(new Bounds(bounds)).setExclude(new Bounds(subEnv));
@@ -74,12 +107,13 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 				}
 				subEnv.expandToInclude(bounds);
 				dataManager.reload();
+				return Boolean.TRUE;
 			}
 			catch (IOException e) {
 				// do nothing try again on next map change
 				//ErrorReporter.getInstance().handleSilentException(e);
+				return Boolean.FALSE;
 			}
-			return null;
 		}
 	}
 
@@ -146,8 +180,12 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 		@Override
 		public View getInfoWindow(Marker marker) {
 			HazardItem hi = markerToItem.get(marker.getId());
-			TextView tv = (TextView) window.findViewById(R.id.hazard_list_item_tv);
-			tv.setText(hi.h.getHeadline());
+			//TextView tv = (TextView) window.findViewById(R.id.hazard_list_item_tv);
+			//tv.setText(hi.h.getHeadline());
+			((TextView) window.findViewById(R.id.hazard_list_item_event)).setText(hi.h.getInfo().getEvent());
+			((TextView) window.findViewById(R.id.hazard_list_item_expires)).setText(hi.h.getEffectiveString() + " - "
+					+ hi.h.getExpiresString());
+			((TextView) window.findViewById(R.id.hazard_list_item_senderName)).setText(hi.h.getInfo().getSenderName());
 			return window;
 		}
 
@@ -173,6 +211,23 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 	}
 
 	@Override
+	public void onAttach(Activity activity) {
+		Log.v();
+		super.onAttach(activity);
+		this.rpcSpinner = createSpinner();
+		this.loadSpinner = createSpinner();
+	}
+
+	@Override
+	public void onDetach() {
+		rpcSpinner.dismiss();
+		rpcSpinner = null;
+		loadSpinner.dismiss();
+		loadSpinner = null;
+		super.onDetach();
+	}
+
+	@Override
 	public void onResume() {
 		Log.v();
 		super.onResume();
@@ -182,16 +237,28 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 	public BaseMapFragment() {}
 
 	@Override
-	public void onAttach(Activity activity) {
-		Log.v();
-		super.onAttach(activity);
-	}
-
-	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.v();
 		super.onCreate(savedInstanceState);
 		setRetainInstance(true);
+	}
+
+	// FIXME want just the spinner, not the background
+	private AlertDialog createSpinner() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		ProgressBar pb = new ProgressBar(getActivity());
+		pb.setLayoutParams(new LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT));
+		pb.setBackgroundResource(android.R.color.transparent);
+		builder.setView(pb);
+		AlertDialog spinner = builder.create(); // do we need to create our own dialog class instead of using AlertDialog? shouldn't setView do the trick?
+		Window w = spinner.getWindow();
+		w.setGravity(Gravity.BOTTOM);
+		w.setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+		w.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+		w.setFormat(PixelFormat.TRANSLUCENT);
+		w.setBackgroundDrawableResource(android.R.color.transparent);
+		w.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);
+		return spinner;
 	}
 
 	@Override
@@ -214,10 +281,13 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 			public void onCameraChange(CameraPosition arg0) {
 				Log.v();
 				bounds = Util.toEnvelope(getBounds());
-				AlertFilter filter = dataManager.getFilter();
+				AlertFilter filter = getDataManager().getFilter();
 				filter.setInclude(new Bounds(bounds));
-				dataManager.setFilter(filter);
+				getDataManager().setFilter(filter);
 				new SubscriptionManager().execute();
+				if (null != loadSpinner) {
+					loadSpinner.show();
+				}
 			}
 		});
 		map.setInfoWindowAdapter(new HazardInfoWindowAdapter());
@@ -345,10 +415,14 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 	public void updateResults(Map<String, Hazard> results) {
 		Log.v();
 		loadResults(results);
+		if (null != loadSpinner) {
+			loadSpinner.dismiss();
+		}
 	}
 
 	@Override
 	public DataManager getDataManager() {
+		new Assert(null != dataManager);
 		return dataManager;
 	}
 }

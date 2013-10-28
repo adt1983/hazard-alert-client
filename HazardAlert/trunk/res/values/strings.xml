@@ -11,10 +11,9 @@
     <string name="ShowListView">Show List View</string>
     <string name="action_search">Search</string>
     <string name="active_hazards">Active Hazards</string>
-
     <string name="filter_by_effectiveDate">Filter By EffectiveDate</string>
     <string name="legalnotices">Legal Notices</string>
-    
+
     <color name="Black">#000000</color>
     <color name="White">#FFFFFF</color>
     <color name="Gray">#888888</color>
@@ -26,5 +25,6 @@
     <color name="Blue">#0000FF</color>
     <color name="ExpandChildBackground">#FFAFABAB</color>
     <color name="ExpandGroupBackground">#FF7C7C7C</color>
+    <color name="Transparent">#00000000</color>
 
 </resources>

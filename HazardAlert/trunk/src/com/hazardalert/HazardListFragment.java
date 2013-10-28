@@ -26,14 +26,17 @@ public class HazardListFragment extends ListFragment implements DataSubscriber {
 		@Override
 		public View getView(final int position, View convertView, ViewGroup parent) {
 			View row = super.getView(position, convertView, parent);
-			final Hazard alert = this.getItem(position);
-			TextView tv = (TextView) row.findViewById(R.id.hazard_list_item_tv);
-			tv.setText(alert.getHeadline());
+			final Hazard h = this.getItem(position);
+			//TextView tv = (TextView) row.findViewById(R.id.hazard_list_item_tv);
+			//tv.setText(alert.getHeadline());
+			((TextView) row.findViewById(R.id.hazard_list_item_event)).setText(h.getInfo().getEvent());
+			((TextView) row.findViewById(R.id.hazard_list_item_expires)).setText(h.getEffectiveString() + " - " + h.getExpiresString());
+			((TextView) row.findViewById(R.id.hazard_list_item_senderName)).setText(h.getInfo().getSenderName());
 			OnClickListener listener = new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					Log.v();
-					HazardDetail.start(getContext(), alert);
+					HazardDetail.start(getContext(), h);
 				}
 			};
 			row.setOnClickListener(listener);
@@ -74,7 +77,8 @@ public class HazardListFragment extends ListFragment implements DataSubscriber {
 		for (Map.Entry<String, Hazard> e : results.entrySet()) {
 			hazards.add(e.getValue());
 		}
-		HazardListAdapter adapter = new HazardListAdapter(getActivity(), R.layout.hazard_list_item, R.id.hazard_list_item_tv, hazards);
+		HazardListAdapter adapter = new HazardListAdapter(getActivity(), R.layout.hazard_list_item, R.id.hazard_list_item_event, hazards);
+		//HazardListAdapter adapter = new HazardListAdapter(getActivity(), R.layout.hazard_list_item, R.id.hazard_list_item_tv, hazards);
 		this.setListAdapter(adapter);
 	}
 }

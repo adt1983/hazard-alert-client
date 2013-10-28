@@ -60,14 +60,25 @@ public class GCMIntentService extends GCMBaseIntentService {
 	protected void onMessage(Context context, Intent intent) {
 		Log.v();
 		HazardAlert.setPreference(getApplicationContext(), "lastGCM", new Date().getTime());
-		try {
-			com.google.publicalerts.cap.Alert alert = new AlertAPI().alertFind(intent.getStringExtra("fullName"));
-			Database db = Database.getInstance(context);
-			db.insertAlert(context, alert);
-			db.deleteExpired();
-		}
-		catch (IOException e) {
-			throw new RuntimeException(e);
+		for (long retryInterval = 100;; retryInterval *= 2) {
+			try {
+				com.google.publicalerts.cap.Alert alert = new AlertAPI().alertFind(intent.getStringExtra("fullName"));
+				Database db = Database.getInstance(context);
+				db.insertAlert(context, alert);
+				db.deleteExpired();
+				return;
+			}
+			catch (IOException e) {
+				if (retryInterval > C.ONE_HOUR_MS) {
+					throw new RuntimeException(e);
+				}
+				try {
+					Thread.sleep(retryInterval);
+				}
+				catch (InterruptedException e1) {
+					//
+				}
+			}
 		}
 	}
 

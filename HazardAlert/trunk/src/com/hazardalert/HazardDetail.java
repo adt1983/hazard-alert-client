@@ -1,23 +1,21 @@
 package com.hazardalert;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.text.util.Linkify;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.api.client.util.DateTime;
 import com.google.publicalerts.cap.Alert;
+import com.google.publicalerts.cap.Area;
 import com.google.publicalerts.cap.Info;
 import com.google.publicalerts.cap.Info.Certainty;
 import com.google.publicalerts.cap.Info.Severity;
 import com.google.publicalerts.cap.Info.Urgency;
+import com.hazardalert.common.CommonUtil;
 
 public class HazardDetail extends FragmentActivity {
 	public static void start(Context ctx, Hazard h) {
@@ -33,35 +31,49 @@ public class HazardDetail extends FragmentActivity {
 		String id = getIntent().getStringExtra("id");
 		Database db = Database.getInstance(this);
 		Hazard h = db.safeGetByHazardId(id);
+		Log.d(h.getFullName());
 		final Alert alert = h.getAlert();
-		final Info info0 = alert.getInfo(0);
+		final Info info = h.getInfo();
+		final Area area = h.getArea();
 		this.setContentView(R.layout.hazard_detail);
 		if (Alert.Scope.PUBLIC != alert.getScope() || Alert.Status.ACTUAL != alert.getStatus()) {
 			((LinearLayout) this.findViewById(R.id.alert_test_scope)).setVisibility(View.VISIBLE);
 		}
-		((TextView) this.findViewById(R.id.alert_event)).setText(h.getHeadline());
-		((TextView) this.findViewById(R.id.alert_sender)).setText(h.getAlert().getSender());
-		setTextView(R.id.alert_urgency, info0.getUrgency());
-		setTextView(R.id.alert_severity, info0.getSeverity());
-		setTextView(R.id.alert_certainty, info0.getCertainty());
-		
-		((TextView) this.findViewById(R.id.alert_effective)).setText(localizeEffectiveDate(info0.getEffective())); 
-		((TextView) this.findViewById(R.id.alert_desc)).setText(info0.getDescription());
-		((TextView) this.findViewById(R.id.alert_instruction)).setText(info0.getInstruction());
-		((TextView) this.findViewById(R.id.alert_areadesc)).setText(info0.getArea(0).getAreaDesc());
-		
+		((TextView) this.findViewById(R.id.alert_desc)).setText(CommonUtil.lowercaseLinks(info.getDescription()));
+		if (info.hasInstruction()) {
+			TextView instruction = ((TextView) this.findViewById(R.id.alert_instruction));
+			instruction.setText("\nInstruction:\n" + CommonUtil.lowercaseLinks(info.getInstruction()));
+			instruction.setVisibility(View.VISIBLE);
+		}
+		if (info.hasWeb()) {
+			TextView web = ((TextView) findViewById(R.id.alert_web));
+			web.setText("\nMore Info: " + info.getWeb());
+			web.setVisibility(View.VISIBLE);
+		}
+		if (info.hasContact()) {
+			TextView contact = ((TextView) this.findViewById(R.id.alert_contact));
+			contact.setText("\nContact: " + info.getContact());
+			contact.setVisibility(View.VISIBLE);
+		}
+		((TextView) this.findViewById(R.id.alert_event)).setText("\nEvent: " + info.getEvent());
+		TextView sender = ((TextView) this.findViewById(R.id.alert_sender));
+		if (!info.hasContact()) {
+			sender.setAutoLinkMask(Linkify.ALL); // only linkify sender if we have no other contact
+		}
+		sender.setText("Sender: " + alert.getSender());
+		if (info.hasSenderName() && !info.getSenderName().equals(alert.getSender())) {
+			TextView senderName = ((TextView) this.findViewById(R.id.alert_senderName));
+			senderName.setText("Sender Name: " + info.getSenderName());
+			senderName.setVisibility(View.VISIBLE);
+		}
+		setTextView(R.id.alert_urgency, info.getUrgency());
+		setTextView(R.id.alert_severity, info.getSeverity());
+		setTextView(R.id.alert_certainty, info.getCertainty());
+		((TextView) this.findViewById(R.id.alert_effective)).setText("Effective: " + h.getEffectiveString());
+		((TextView) this.findViewById(R.id.alert_expires)).setText("Expires: " + h.getExpiresString());
+		((TextView) this.findViewById(R.id.alert_areadesc)).setText("Affected Area: " + area.getAreaDesc());
 	}
 
-	@SuppressLint("SimpleDateFormat")
-	private static String localizeEffectiveDate(String effectiveDate) {
-		
-		DateTime dateTime = new DateTime(effectiveDate);
-		SimpleDateFormat dateFormatter1 = new SimpleDateFormat("dd MMM yyyy");
-		SimpleDateFormat dateFormatter2 = new SimpleDateFormat("hh:mm:ss");
-		Date date = new Date(dateTime.getValue());
-		return dateFormatter1.format(date) + " at " + dateFormatter2.format(date);
-    }
-	
 	private void setTextView(int id, Urgency urgency) {
 		TextView tv = (TextView) this.findViewById(id);
 		tv.setText(urgency.name());
