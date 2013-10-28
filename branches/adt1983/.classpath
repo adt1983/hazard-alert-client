@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="shared"/>
+	<classpathentry kind="src" path="endpoint-libs"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry kind="src" path="gen"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
+	<classpathentry kind="src" output="bin/classes" path="src">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libs/google-api-client-1.16.0-rc.jar"/>
+	<classpathentry kind="lib" path="libs/google-api-client-android-1.16.0-rc.jar"/>
+	<classpathentry kind="lib" path="libs/google-http-client-1.16.0-rc.jar"/>
+	<classpathentry kind="lib" path="libs/google-http-client-android-1.16.0-rc.jar"/>
+	<classpathentry kind="lib" path="libs/google-oauth-client-1.16.0-rc.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/google-play-services_lib"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="output" path="bin/classes"/>
+</classpath>

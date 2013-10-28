@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="certainty">
+        <item>Observed</item>
+        <item>Very Likely</item>
+        <item>Likely</item>
+        <item>Possible</item>
+        <item>Unlikely</item>
+        <item>Unknown</item>
+    </string-array>
+    <string-array name="certaintyValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="urgency">
+        <item>Immediate</item>
+        <item>Expected</item>
+        <item>Future</item>
+        <item>Past</item>
+        <item>Unknown</item>
+    </string-array>
+    <string-array name="urgencyValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="severity">
+        <item>Extreme</item>
+        <item>Severe</item>
+        <item>Moderate</item>
+        <item>Minor</item>
+        <item>Unknown</item>
+    </string-array>
+    <string-array name="severityValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+</resources>
