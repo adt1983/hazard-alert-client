@@ -22,7 +22,7 @@ public class HazardAlert extends Application {
 		Log.v();
 		super.onCreate();
 		initializePreferences();
-		if (!isDebug()) {
+		if (!isDebug(this)) {
 			org.acra.ACRA.init(this);
 		}
 		else {
@@ -42,8 +42,8 @@ public class HazardAlert extends Application {
 	@Override
 	public void onTerminate() {}
 
-	private boolean isDebug() {
-		return (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) > 0;
+	private static boolean isDebug(Context ctx) {
+		return (ctx.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) > 0;
 	}
 
 	public static boolean containsPreference(Context context, String key) {
@@ -116,6 +116,15 @@ public class HazardAlert extends Application {
 		editor.putString(key, value);
 		if (!editor.commit()) {
 			throw new RuntimeException(key);
+		}
+	}
+
+	public static void logException(Context ctx, Throwable t) {
+		if (!isDebug(ctx)) {
+			org.acra.ErrorReporter.getInstance().handleSilentException(t);
+		}
+		else {
+			Log.d("msg", t);
 		}
 	}
 }

@@ -24,6 +24,8 @@ public class MainActivity extends FragmentActivity {
 
 	private BaseMapFragment mapFragment;
 
+	private EditFilterFragment editFilterFragment;
+
 	private HazardListFragment listFragment;
 
 	private Fragment visibleFragment = null;
@@ -51,6 +53,9 @@ public class MainActivity extends FragmentActivity {
 		}
 		else if (listFragment.getTag().equals(visibleFragmentTag)) {
 			return listFragment;
+		}
+		else if (editFilterFragment.getTag().equals(visibleFragmentTag)) {
+			return editFilterFragment;
 		}
 		else {
 			throw new RuntimeException();
@@ -99,6 +104,13 @@ public class MainActivity extends FragmentActivity {
 			ft.add(R.id.fragment_container, listFragment, HazardListFragment.TAG);
 		}
 		ft.hide(listFragment);
+		editFilterFragment = (EditFilterFragment) getSupportFragmentManager().findFragmentByTag(EditFilterFragment.TAG);
+		if (null == editFilterFragment) {
+			editFilterFragment = new EditFilterFragment();
+			editFilterFragment.setDataManager(dataFragment);
+			ft.add(R.id.fragment_container, editFilterFragment, EditFilterFragment.TAG);
+		}
+		ft.hide(editFilterFragment);
 		ft.commit();
 	}
 
@@ -125,11 +137,18 @@ public class MainActivity extends FragmentActivity {
 		Log.d();
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		if (this.visibleFragment == this.mapFragment) {
-			menu.findItem(R.id.action_list).setVisible(true);
 			menu.findItem(R.id.action_map).setVisible(false);
+			menu.findItem(R.id.action_list).setVisible(true);
+			menu.findItem(R.id.action_search).setVisible(true);
 		}
 		else if (this.visibleFragment == this.listFragment) {
 			menu.findItem(R.id.action_list).setVisible(false);
+			menu.findItem(R.id.action_map).setVisible(true);
+			menu.findItem(R.id.action_search).setVisible(true);
+		}
+		else if (this.visibleFragment == this.editFilterFragment) {
+			menu.findItem(R.id.action_search).setVisible(false);
+			menu.findItem(R.id.action_list).setVisible(true);
 			menu.findItem(R.id.action_map).setVisible(true);
 		}
 		else {
@@ -152,6 +171,12 @@ public class MainActivity extends FragmentActivity {
 	public boolean onShowMap(MenuItem view) {
 		Log.d();
 		showFragment(mapFragment);
+		return true;
+	}
+
+	public boolean onShowEditFilter(MenuItem view) {
+		Log.d();
+		showFragment(editFilterFragment);
 		return true;
 	}
 

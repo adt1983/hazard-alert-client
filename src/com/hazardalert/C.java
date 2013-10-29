@@ -48,4 +48,6 @@ public class C {
 	public static final long ONE_HOUR_MS = 60 * ONE_MINUTE_MS;
 
 	public static final long ONE_DAY_MS = 24 * ONE_HOUR_MS;
+
+	public static final Long ONE_WEEK_MS = 7 * ONE_DAY_MS;
 }
