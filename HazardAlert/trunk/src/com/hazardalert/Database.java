@@ -13,7 +13,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
-import android.text.TextUtils;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.publicalerts.cap.Alert;
@@ -21,7 +20,6 @@ import com.google.publicalerts.cap.Alert.MsgType;
 import com.hazardalert.common.AlertFilter;
 import com.hazardalert.common.Assert;
 import com.hazardalert.common.Bounds;
-import com.hazardalert.common.CommonUtil;
 
 // TODO pathological coupling with HazardTable - needs to be a better pattern for this. ORMLite?
 public class Database {
@@ -353,24 +351,36 @@ public class Database {
 			strings.add(filter.getMinExpires().toString());
 		}
 		if (null != filter.getStatus()) {
-			sql += " AND status IN (?)";
-			String values = TextUtils.join(", ", CommonUtil.toString(filter.getStatus()));
-			strings.add(values);
+			sql += " AND status IN (";
+			for (int i = 0; i < filter.getStatus().size(); i++) {
+				sql += (0 == i) ? "?" : ", ?";
+				strings.add(filter.getStatus().get(i).toString());
+			}
+			sql += ")";
 		}
 		if (null != filter.getUrgency()) {
-			sql += " AND urgency IN (?)";
-			String values = TextUtils.join(", ", CommonUtil.toString(filter.getUrgency()));
-			strings.add(values);
+			sql += " AND urgency IN (";
+			for (int i = 0; i < filter.getUrgency().size(); i++) {
+				sql += (0 == i) ? "?" : ", ?";
+				strings.add(filter.getUrgency().get(i).toString());
+			}
+			sql += ")";
 		}
 		if (null != filter.getSeverity()) {
-			sql += " AND severity IN (?)";
-			String values = TextUtils.join(", ", CommonUtil.toString(filter.getSeverity()));
-			strings.add(values);
+			sql += " AND severity IN (";
+			for (int i = 0; i < filter.getSeverity().size(); i++) {
+				sql += (0 == i) ? "?" : ", ?";
+				strings.add(filter.getSeverity().get(i).toString());
+			}
+			sql += ")";
 		}
 		if (null != filter.getCertainty()) {
-			sql += " AND certainty IN (?)";
-			String values = TextUtils.join(", ", CommonUtil.toString(filter.getCertainty()));
-			strings.add(values);
+			sql += " AND certainty IN (";
+			for (int i = 0; i < filter.getCertainty().size(); i++) {
+				sql += (0 == i) ? "?" : ", ?";
+				strings.add(filter.getCertainty().get(i).toString());
+			}
+			sql += ")";
 		}
 		String selectionArgs[] = new String[strings.size()];
 		for (int i = 0; i < strings.size(); i++) {

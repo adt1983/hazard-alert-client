@@ -1,5 +1,6 @@
 package com.hazardalert;
 
+import java.text.DateFormat;
 import java.util.Date;
 
 import android.content.Context;
@@ -84,5 +85,11 @@ public final class Util {
 		e.expandToInclude(bounds.northeast.latitude, bounds.northeast.longitude);
 		e.expandToInclude(bounds.southwest.latitude, bounds.southwest.longitude);
 		return e;
+	}
+
+	public static String timeToString(Long time) {
+		Date d = new Date(time);
+		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+		return df.format(d);
 	}
 }

@@ -76,7 +76,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 					Thread.sleep(retryInterval);
 				}
 				catch (InterruptedException e1) {
-					//
+					HazardAlert.logException(context, e1);
 				}
 			}
 		}

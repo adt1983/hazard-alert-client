@@ -77,6 +77,9 @@ public class DataManagerFragment extends Fragment implements DataManager {
 
 	@Override
 	public void reload() {
+		if (!isAdded()) {
+			return;
+		}
 		getLoaderManager().restartLoader(BaseMapFragment.LOADER_ID_BOUNDS_LOCAL, null, this);
 	}
 }
