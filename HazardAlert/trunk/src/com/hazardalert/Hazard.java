@@ -152,8 +152,8 @@ public class Hazard {
 
 	private void computeBoundingBox() {
 		Envelope env = area.getEnvelopeInternal();
-		bbNE = new Point(env.getMaxX(), env.getMaxY());
-		bbSW = new Point(env.getMinX(), env.getMinY());
+		bbNE = new Point(env.getMaxY(), env.getMaxX());
+		bbSW = new Point(env.getMinY(), env.getMinX());
 	}
 
 	public boolean intersects(LatLngBounds bounds) {

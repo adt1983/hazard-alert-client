@@ -18,8 +18,14 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-ignorewarnings
 -dontobfuscate
 -assumenosideeffects class android.util.Log {
     public static *** d(...);
     public static *** v(...);
 }
+-assumenosideeffects class com.hazardalert.Log {
+	public static *** d(...);
+    public static *** v(...);
+}
+

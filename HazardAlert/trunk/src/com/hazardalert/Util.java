@@ -12,9 +12,7 @@ import android.net.NetworkInfo;
 import android.text.format.Time;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.hazardalert.common.Point;
-import com.vividsolutions.jts.geom.Envelope;
 
 public final class Util {
 	private static final Time sTime = new Time();
@@ -78,13 +76,6 @@ public final class Util {
 		ConnectivityManager cm = (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo ni = cm.getActiveNetworkInfo();
 		return null != ni && ni.isConnected();
-	}
-
-	public static Envelope toEnvelope(LatLngBounds bounds) {
-		Envelope e = new Envelope();
-		e.expandToInclude(bounds.northeast.latitude, bounds.northeast.longitude);
-		e.expandToInclude(bounds.southwest.latitude, bounds.southwest.longitude);
-		return e;
 	}
 
 	public static String timeToString(Long time) {

@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.DatePicker;
 
+import com.google.analytics.tracking.android.EasyTracker;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.hazardalert.common.AlertFilter;
 
@@ -66,12 +67,14 @@ public class MainActivity extends FragmentActivity {
 	public void onStart() {
 		super.onStart();
 		Log.d();
+		EasyTracker.getInstance(this).activityStart(this);
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
 		Log.d();
+		EasyTracker.getInstance(this).activityStop(this);
 	}
 
 	@Override
