@@ -16,6 +16,7 @@
 	<classpathentry kind="lib" path="libs/google-http-client-1.16.0-rc.jar"/>
 	<classpathentry kind="lib" path="libs/google-http-client-android-1.16.0-rc.jar"/>
 	<classpathentry kind="lib" path="libs/google-oauth-client-1.16.0-rc.jar"/>
+	<classpathentry kind="lib" path="libs/libGoogleAnalyticsServices.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/google-play-services_lib"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin/classes"/>

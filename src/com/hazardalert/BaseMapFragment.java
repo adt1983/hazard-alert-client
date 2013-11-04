@@ -38,14 +38,12 @@ import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.publicalerts.cap.Alert;
 import com.hazardalert.common.AlertFilter;
 import com.hazardalert.common.Assert;
-import com.hazardalert.common.Bounds;
 import com.vividsolutions.jts.geom.Envelope;
 
 public class BaseMapFragment extends SupportMapFragment implements DataSubscriber {
@@ -57,7 +55,7 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 
 	private GoogleMap map = null;
 
-	private Envelope bounds; // can't access map from off ui thread
+	private Bounds visibleBounds;
 
 	private final Envelope subEnv = new Envelope();
 
@@ -89,11 +87,11 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			if (subEnv.contains(bounds)) {
+			if (subEnv.contains(visibleBounds.toEnvelope())) {
 				return Boolean.FALSE;
 			}
 			Context ctx = getActivity().getApplicationContext();
-			AlertFilter filter = new AlertFilter().setInclude(new Bounds(bounds)).setExclude(new Bounds(subEnv));
+			AlertFilter filter = new AlertFilter().setInclude(visibleBounds).setExclude(new Bounds(subEnv));
 			try {
 				List<Alert> newAlerts = new AlertAPI().list(filter);
 				for (Alert a : newAlerts) {
@@ -105,7 +103,7 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 						Log.e("Got invalid alert!", e);
 					}
 				}
-				subEnv.expandToInclude(bounds);
+				subEnv.expandToInclude(visibleBounds.toEnvelope());
 				dataManager.reload();
 				return Boolean.TRUE;
 			}
@@ -280,9 +278,9 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 			@Override
 			public void onCameraChange(CameraPosition arg0) {
 				Log.v();
-				bounds = Util.toEnvelope(getBounds());
+				visibleBounds = new Bounds(map.getProjection().getVisibleRegion().latLngBounds); // can't access map from off UI thread
 				AlertFilter filter = getDataManager().getFilter();
-				filter.setInclude(new Bounds(bounds));
+				filter.setInclude(visibleBounds);
 				getDataManager().setFilter(filter);
 				new SubscriptionManager().execute();
 				if (null != loadSpinner) {
@@ -347,10 +345,6 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 
 	private boolean hasHazard(String id) {
 		return hazardToItem.containsKey(id);
-	}
-
-	public LatLngBounds getBounds() {
-		return map.getProjection().getVisibleRegion().latLngBounds;
 	}
 
 	/*
