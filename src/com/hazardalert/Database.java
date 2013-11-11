@@ -1,12 +1,18 @@
 package com.hazardalert;
 
-import static com.hazardalert.Util.toPoint;
+import static com.hazardalert.U.toPoint;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -14,12 +20,15 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 
+import com.appspot.hazard_alert.alertendpoint.model.AlertTransport;
+import com.google.api.client.util.Base64;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.publicalerts.cap.Alert;
 import com.google.publicalerts.cap.Alert.MsgType;
 import com.hazardalert.common.AlertFilter;
 import com.hazardalert.common.Assert;
 import com.hazardalert.common.Bounds;
+import com.j256.ormlite.dao.Dao;
 
 // TODO pathological coupling with HazardTable - needs to be a better pattern for this. ORMLite?
 public class Database {
@@ -29,18 +38,13 @@ public class Database {
 
 	private static Database instance = null;
 
+	private static Context appContext;
+
 	synchronized public static Database getInstance(Context c) {
 		if (null == instance) {
-			instance = new Database(c.getApplicationContext());
+			appContext = c.getApplicationContext();
+			instance = new Database(appContext);
 			instance.open();
-		}
-		return instance;
-	}
-
-	//bad idea?
-	public static Database getInstance() {
-		if (null == instance) {
-			throw new RuntimeException();
 		}
 		return instance;
 	}
@@ -57,7 +61,12 @@ public class Database {
 		helper.close();
 	}
 
-	public void insertAlert(Context context, com.google.publicalerts.cap.Alert alert) {
+	public void insertAlert(Context context, AlertTransport at) throws InvalidProtocolBufferException {
+		if (null == at) {
+			return;
+		}
+		byte[] bytes = Base64.decodeBase64(at.getPayload());
+		Alert alert = com.google.publicalerts.cap.Alert.parseFrom(bytes);
 		// duplicate?
 		Log.v("Got alert: " + Hazard.getFullName(alert));
 		if (alreadyExistsFullName(Hazard.getFullName(alert))) {
@@ -65,7 +74,7 @@ public class Database {
 			return;
 		}
 		for (int i = 0; i < alert.getInfoCount(); i++) {
-			insertHazard(context, new Hazard(alert, i));
+			insertHazard(context, new Hazard(alert, i, null == at.getSourceUrl() ? "" : at.getSourceUrl()));
 		}
 		// handle updates
 		if (alert.getMsgType() == MsgType.CANCEL || alert.getMsgType() == MsgType.UPDATE) {
@@ -82,11 +91,11 @@ public class Database {
 
 	// http://stackoverflow.com/questions/3860008/bulk-insertion-on-android-device
 	// http://stackoverflow.com/questions/5596354/insertion-of-thousands-of-contact-entries-using-applybatch-is-slow
-	public void insertAlerts(Context context, List<com.google.publicalerts.cap.Alert> alerts) {
+	public void insertAlerts(Context context, List<AlertTransport> alerts) throws InvalidProtocolBufferException {
 		try {
 			db.beginTransaction();
-			for (com.google.publicalerts.cap.Alert a : alerts) {
-				insertAlert(context, a);
+			for (AlertTransport at : alerts) {
+				insertAlert(context, at);
 			}
 			db.setTransactionSuccessful();
 		}
@@ -100,12 +109,9 @@ public class Database {
 		h.onNew(context);
 	}
 
-	/*
-	private final String[] allColumns = { HazardTable.COLUMN_ID, HazardTable.COLUMN_ALERT, HazardTable.COLUMN_EXPIRES,
-			HazardTable.COLUMN_EFFECTIVE, HazardTable.COLUMN_ALERT_FULL_NAME, HazardTable.COLUMN_BB_NE_LAT, HazardTable.COLUMN_BB_NE_LNG,
-			HazardTable.COLUMN_BB_SW_LAT, HazardTable.COLUMN_BB_SW_LNG, HazardTable.COLUMN_VISIBLE };*/
 	// columns necessary to instantiate Hazard objects
-	private final String[] builderColumns = { HazardTable.COLUMN_ID, HazardTable.COLUMN_ALERT, HazardTable.COLUMN_VISIBLE };
+	private final String[] builderColumns = { HazardTable.COLUMN_ID, HazardTable.COLUMN_ALERT, HazardTable.COLUMN_SOURCE_URL,
+			HazardTable.COLUMN_VISIBLE };
 
 	private final String[] headerColumns = { HazardTable.COLUMN_ID, HazardTable.COLUMN_EXPIRES, HazardTable.COLUMN_ALERT_FULL_NAME,
 			HazardTable.COLUMN_BB_NE_LAT, HazardTable.COLUMN_BB_NE_LNG, HazardTable.COLUMN_BB_SW_LAT, HazardTable.COLUMN_BB_SW_LNG,
@@ -114,7 +120,14 @@ public class Database {
 	public static Hazard cursorToHazard(Cursor c) {
 		Hazard h = null;
 		try {
-			h = new Hazard(Alert.newBuilder().mergeFrom(c.getBlob(c.getColumnIndexOrThrow(HazardTable.COLUMN_ALERT))).build());
+			String sourceUrl;
+			try {
+				sourceUrl = URLDecoder.decode(c.getString(c.getColumnIndexOrThrow("sourceUrl")), "UTF-8");
+			}
+			catch (UnsupportedEncodingException e) {
+				throw new RuntimeException(e);
+			}
+			h = new Hazard(Alert.newBuilder().mergeFrom(c.getBlob(c.getColumnIndexOrThrow(HazardTable.COLUMN_ALERT))).build(), sourceUrl);
 			h.db_id = c.getLong(c.getColumnIndexOrThrow(HazardTable.COLUMN_ID));
 			h.visible = (c.getInt(c.getColumnIndexOrThrow(HazardTable.COLUMN_VISIBLE)) == 1) ? true : false;
 		}
@@ -137,6 +150,12 @@ public class Database {
 		values.put(HazardTable.COLUMN_EXPIRES, h.getExpires().getTime());
 		values.put(HazardTable.COLUMN_EFFECTIVE, h.getEffective().getTime());
 		values.put(HazardTable.COLUMN_ALERT_FULL_NAME, h.getFullName());
+		try {
+			values.put(HazardTable.COLUMN_SOURCE_URL, URLEncoder.encode(h.getSourceUrl(), "UTF-8"));
+		}
+		catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 		values.put(HazardTable.COLUMN_BB_NE_LAT, h.bbNE.getLat());
 		values.put(HazardTable.COLUMN_BB_NE_LNG, h.bbNE.getLng());
 		values.put(HazardTable.COLUMN_BB_SW_LAT, h.bbSW.getLat());
@@ -327,16 +346,28 @@ public class Database {
 		return exiting;
 	}
 
+	String addBounds(Bounds b, List<String> args) {
+		String sql = "(bb_ne_lng > ?) AND (bb_ne_lat > ?) AND (bb_sw_lng < ?) AND (bb_sw_lat < ?)";
+		args.add(Double.toString(b.getSw_lng()));
+		args.add(Double.toString(b.getSw_lat()));
+		args.add(Double.toString(b.getNe_lng()));
+		args.add(Double.toString(b.getNe_lat()));
+		return sql;
+	}
+
 	public List<Hazard> list(AlertFilter filter) {
 		ArrayList<String> strings = new ArrayList<String>();
 		String sql = "1 = 1";
 		if (null != filter.getInclude()) {
 			Bounds b = filter.getInclude();
-			sql += " AND NOT (bb_ne_lat < ?) AND NOT (bb_ne_lng < ?) AND NOT (bb_sw_lat > ?) AND NOT (bb_sw_lng > ?)";
-			strings.add(Double.toString(b.getSw_lat()));
-			strings.add(Double.toString(b.getSw_lng()));
-			strings.add(Double.toString(b.getNe_lat()));
-			strings.add(Double.toString(b.getNe_lng()));
+			if (!b.spansAntiMeridian()) {
+				sql += " AND " + addBounds(b, strings);
+			}
+			else {
+				Bounds split[] = b.splitOnAntiMeridian();
+				new Assert(2 == split.length);
+				sql += " AND ((" + addBounds(split[0], strings) + ") OR (" + addBounds(split[1], strings) + "))";
+			}
 		}
 		if (null != filter.getExclude()) {
 			throw new RuntimeException();
@@ -393,8 +424,38 @@ public class Database {
 		List<Hazard> results = cursorToList(db.query("hazard", builderColumns, sql, selectionArgs, null, null, null, limit));
 		if (null != filter.getInclude()) {
 			//eliminate <area> with mulitple <polygon> that straddle our box but don't intersect
+			Bounds b = filter.getInclude();
+			if (!b.spansAntiMeridian()) {
+				for (Iterator<Hazard> h = results.iterator(); h.hasNext();) {
+					if (!h.next().intersects(b.toEnvelope())) {
+						h.remove();
+					}
+				}
+			}
+			else {
+				Bounds split[] = b.splitOnAntiMeridian();
+				for (Iterator<Hazard> h = results.iterator(); h.hasNext();) {
+					Hazard haz = h.next();
+					if (!haz.intersects(split[0].toEnvelope()) && !haz.intersects(split[1].toEnvelope())) {
+						h.remove();
+					}
+				}
+			}
+		}
+		if (null != filter.getSenders()) {
+			Set<String> senders = new HashSet<String>();
+			try {
+				Dao<Sender, Long> dao = Sender.getDao(appContext);
+				for (Long senderId : filter.getSenders()) {
+					Sender s = dao.queryForId(senderId);
+					senders.add(s.getSender());
+				}
+			}
+			catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 			for (Iterator<Hazard> h = results.iterator(); h.hasNext();) {
-				if (!h.next().intersects(filter.getInclude().toEnvelope())) {
+				if (!senders.contains(h.next().getAlert().getSender())) {
 					h.remove();
 				}
 			}

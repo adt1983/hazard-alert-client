@@ -23,14 +23,15 @@ import com.hazardalert.common.Assert;
 public class DataManagerFragment extends Fragment implements DataManager {
 	public static final String TAG = "DataManagerFragment";
 
-	private AlertFilter filter = new AlertFilter();
+	private AlertFilter filter = AlertFilter.defaultClientFilter();
 
-	private final List<DataSubscriber> subscribers = new LinkedList<DataSubscriber>();
+	private final List<Subscriber> subscribers = new LinkedList<Subscriber>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setRetainInstance(true);
+		// Filter defaults
 	}
 
 	@Override
@@ -42,8 +43,8 @@ public class DataManagerFragment extends Fragment implements DataManager {
 	@Override
 	public void onLoadFinished(Loader<Map<String, Hazard>> loader, Map<String, Hazard> results) {
 		new Assert(BaseMapFragment.LOADER_ID_BOUNDS_LOCAL == loader.getId());
-		for (DataSubscriber ds : subscribers) {
-			ds.updateResults(results);
+		for (Subscriber s : subscribers) {
+			s.updateResults(results);
 		}
 	}
 
@@ -64,14 +65,14 @@ public class DataManagerFragment extends Fragment implements DataManager {
 	}
 
 	@Override
-	public void subscribe(DataSubscriber subscriber) {
+	public void subscribe(Subscriber subscriber) {
 		if (!subscribers.contains(subscriber) && null != subscriber) {
 			subscribers.add(subscriber);
 		}
 	}
 
 	@Override
-	public void unsubscribe(DataSubscriber subscriber) {
+	public void unsubscribe(Subscriber subscriber) {
 		subscribers.remove(subscriber);
 	}
 

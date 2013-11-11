@@ -6,6 +6,7 @@ import java.util.Date;
 import android.content.Context;
 import android.content.Intent;
 
+import com.appspot.hazard_alert.alertendpoint.model.AlertTransport;
 import com.google.android.gcm.GCMBaseIntentService;
 
 /**
@@ -52,7 +53,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 	@Override
 	protected void onUnregistered(Context context, String registrationId) {
 		Log.v("Device unregistered: regId = " + registrationId);
-		startService(new Intent(this, OnRegisterGCM.class)); //attempt to restart gcm
+		startService(new Intent(this, OnUpdateSubscription.class)); //attempt to restart gcm
 		//no need to unregister old gcm on server, when it sends a message it should be a NotRegistered error
 	}
 
@@ -62,7 +63,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		HazardAlert.setPreference(getApplicationContext(), "lastGCM", new Date().getTime());
 		for (long retryInterval = 100;; retryInterval *= 2) {
 			try {
-				com.google.publicalerts.cap.Alert alert = new AlertAPI().alertFind(intent.getStringExtra("fullName"));
+				AlertTransport alert = new AlertAPI().alertFind(intent.getStringExtra("fullName"));
 				Database db = Database.getInstance(context);
 				db.insertAlert(context, alert);
 				db.deleteExpired();

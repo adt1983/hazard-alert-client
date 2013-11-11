@@ -12,4 +12,11 @@
         android:key="pref_notif_sound_allow"
         android:title="@string/pref_notif_sound_allow" />
 
+    <PreferenceScreen
+        android:key="@+id/pref_sender_filter"
+        android:summary="Ignore alerts from specific senders"
+        android:title="Allowed Senders" >
+        <intent android:action="com.hazardalert.action.ACTION_SENDER_FILTER" />
+    </PreferenceScreen>
+
 </PreferenceScreen>

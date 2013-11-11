@@ -156,6 +156,13 @@
             android:layout_height="wrap_content"
             android:textColor="@color/White" />
 
+        <TextView
+            android:id="@+id/alert_sourceUrl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="all"
+            android:textColor="@color/White" />
+
         <!-- TODO: MapFragment - kept getting 'IllegalArgumentException: Binary XML file Duplicate id, tag null, or parent id with another fragment' since SupportMapFragment is already instantiated in MainActivity. hmmmm. -->
 
     </LinearLayout>

@@ -24,7 +24,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.appspot.hazard_alert.alertendpoint.model.AlertTransport;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdate;
@@ -41,12 +43,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
-import com.google.publicalerts.cap.Alert;
 import com.hazardalert.common.AlertFilter;
 import com.hazardalert.common.Assert;
 import com.vividsolutions.jts.geom.Envelope;
 
-public class BaseMapFragment extends SupportMapFragment implements DataSubscriber {
+public class BaseMapFragment extends SupportMapFragment implements DataManager.Subscriber {
 	public static final String TAG = "BaseMapFragment";
 
 	public static final int LOADER_ID_BOUNDS_LOCAL = 0;
@@ -93,8 +94,8 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 			Context ctx = getActivity().getApplicationContext();
 			AlertFilter filter = new AlertFilter().setInclude(visibleBounds).setExclude(new Bounds(subEnv));
 			try {
-				List<Alert> newAlerts = new AlertAPI().list(filter);
-				for (Alert a : newAlerts) {
+				List<AlertTransport> newAlerts = new AlertAPI().list(filter);
+				for (AlertTransport a : newAlerts) {
 					try {
 						Database.getInstance(ctx).insertAlert(ctx, a);
 					}
@@ -124,7 +125,7 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 
 		HazardItem(Hazard _h) {
 			h = _h;
-			m = map.addMarker(new MarkerOptions().position(Util.toLatLng(h.getCentroid())));
+			m = map.addMarker(new MarkerOptions().position(U.toLatLng(h.getCentroid())));
 			markerToItem.put(m.getId(), this);
 			for (com.google.publicalerts.cap.Info i : h.getAlert().getInfoList()) {
 				for (com.google.publicalerts.cap.Area a : i.getAreaList()) {
@@ -204,8 +205,6 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 	public void onActivityCreated(Bundle savedInstanceState) {
 		Log.v();
 		super.onActivityCreated(savedInstanceState);
-		checkPlayServices();
-		setupMap();
 	}
 
 	@Override
@@ -229,7 +228,24 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 	public void onResume() {
 		Log.v();
 		super.onResume();
-		checkPlayServices();
+		if (checkPlayServices()) {
+			setupMap();
+		}
+	}
+
+	private boolean checkPlayServices() {
+		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity());
+		if (resultCode != ConnectionResult.SUCCESS) {
+			if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+				GooglePlayServicesUtil.getErrorDialog(resultCode, getActivity(), C.RequestCode.PLAY_SERVICES_RESOLUTION.ordinal()).show();
+			}
+			else {
+				Toast.makeText(getActivity(), "Google Play Services not found!", Toast.LENGTH_LONG).show();
+				Log.e("GooglePlayServices not found! This device is not supported.");
+			}
+			return false;
+		}
+		return true;
 	}
 
 	public BaseMapFragment() {}
@@ -270,9 +286,10 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 			return; // already ran
 		}
 		map = getMap();
-		final Location loc = Util.getLocation(getActivity());
+		new Assert(null != map);
+		final Location loc = U.getLocation(getActivity());
 		map.setMyLocationEnabled(true);
-		CameraUpdate camera = CameraUpdateFactory.newLatLngZoom(Util.toLatLng(loc), 8.0f);
+		CameraUpdate camera = CameraUpdateFactory.newLatLngZoom(U.toLatLng(loc), 8.0f);
 		map.moveCamera(camera);
 		map.setOnCameraChangeListener(new OnCameraChangeListener() {
 			@Override
@@ -379,22 +396,6 @@ public class BaseMapFragment extends SupportMapFragment implements DataSubscribe
 			}
 			addHazard(entry.getValue());
 		}
-	}
-
-	private boolean checkPlayServices() {
-		final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000; // http://developer.android.com/google/gcm/client.html - who the fuck thinks up these magic numbers?
-		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this.getActivity());
-		if (resultCode != ConnectionResult.SUCCESS) {
-			if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-				GooglePlayServicesUtil.getErrorDialog(resultCode, this.getActivity(), PLAY_SERVICES_RESOLUTION_REQUEST).show();
-			}
-			else {
-				//Log.i(TAG, "This device is not supported.");
-				//finish();
-			}
-			return false;
-		}
-		return true;
 	}
 
 	private DataManager dataManager = null;

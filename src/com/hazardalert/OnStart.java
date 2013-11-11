@@ -13,6 +13,7 @@ import com.google.android.gms.location.LocationRequest;
 public class OnStart extends IntentService implements GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener {
 	public static final String SP_KEY_RUNNING = "running";
+
 	private LocationClient locationClient;
 
 	public OnStart() {
@@ -21,25 +22,25 @@ public class OnStart extends IntentService implements GooglePlayServicesClient.C
 
 	@Override
 	public void onStart(Intent intent, int flags) {
-		Log.d();
+		Log.v();
 		super.onStart(intent, flags);
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.d();
+		Log.v();
 		return super.onStartCommand(intent, flags, startId);
 	}
 
 	@Override
 	public void onCreate() {
-		Log.d();
+		Log.v();
 		super.onCreate();
 	}
 
 	@Override
 	public void onDestroy() {
-		Log.d();
+		Log.v();
 		super.onDestroy();
 	}
 
@@ -60,21 +61,23 @@ public class OnStart extends IntentService implements GooglePlayServicesClient.C
 	@Override
 	public void onConnected(Bundle arg0) {
 		Log.v();
+		setupLocationUpdates();
+		setupSubscriptionUpdates();
+	}
+
+	private void setupLocationUpdates() {
 		Intent i = new Intent(this, OnLocationRefresh.class);
 		PendingIntent pi = PendingIntent.getService(this, 0, i, PendingIntent.FLAG_CANCEL_CURRENT);
 		LocationRequest request = LocationRequest.create();
 		request.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 		request.setFastestInterval(50); //50ms
 		request.setSmallestDisplacement((float) 10.0); //10m
-		Util.setLastLocation(getApplicationContext(), locationClient.getLastLocation());
+		U.setLastLocation(getApplicationContext(), locationClient.getLastLocation());
 		locationClient.requestLocationUpdates(request, pi);
-		// Register with GCM
-		Intent registerGCM = new Intent(getApplicationContext(), OnRegisterGCM.class);
-		startService(registerGCM);
-		/*
-		 * Re-center subscription
-		 */
-		Intent subIntent = new Intent(this, OnRecenterSubscription.class);
+	}
+
+	private void setupSubscriptionUpdates() {
+		Intent subIntent = new Intent(this, OnUpdateSubscription.class);
 		PendingIntent subPendingIntent = PendingIntent.getService(this, 0, subIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 		LocationRequest updateSubscriptionRequest = LocationRequest.create();
 		updateSubscriptionRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);

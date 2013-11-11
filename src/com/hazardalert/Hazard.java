@@ -34,6 +34,8 @@ public class Hazard {
 
 	private String fullName; // extended message identifier in form "<sender>,<identifier>,<sent>"
 
+	private String sourceUrl;
+
 	public Alert alert;
 
 	public Point bbNE;
@@ -47,6 +49,59 @@ public class Hazard {
 	public boolean visible; // currently affects device
 
 	private GeometryCollection area;
+
+	public Hazard() {
+		alert = null;
+	}
+
+	public Hazard(Alert alert, String sourceUrl) {
+		new Assert(1 == alert.getInfoCount());
+		this.alert = alert;
+		this.sourceUrl = sourceUrl;
+		initFromAlert();
+	}
+
+	public Hazard(Alert alert, int infoIndex, String sourceUrl) {
+		new Assert(infoIndex >= 0);
+		new Assert(infoIndex < alert.getInfoCount());
+		Alert.Builder b = Alert.newBuilder(alert);
+		Info info = alert.getInfo(infoIndex);
+		b.clearInfo();
+		b.addInfo(info);
+		this.alert = b.build();
+		this.sourceUrl = sourceUrl;
+		initFromAlert();
+	}
+
+	private void initFromAlert() {
+		fullName = getFullName(alert);
+		new Assert(1 == alert.getInfoCount());
+		Info info = alert.getInfo(0);
+		new Assert(info.hasLanguage());
+		new Assert(info.hasEffective());
+		new Assert(info.hasExpires());
+		new Assert(info.hasCertainty());
+		new Assert(info.hasUrgency());
+		new Assert(info.hasSeverity());
+		new Assert(info.hasSenderName());
+		new Assert(info.hasEvent());
+		new Assert(1 == info.getAreaCount());
+		if (getInfo().hasEffective()) {
+			setEffective(U.parse3339(getInfo().getEffective()));
+		}
+		else {
+			setEffective(U.parse3339(alert.getSent()));
+		}
+		setExpires(U.parse3339(getInfo().getExpires()));
+		area = CommonUtil.cap_to_jts(alert); //TODO: switch to multi-polygon?
+		computeBoundingBox(); // TODO only need to do when saving to DB - does this belong here?
+		visible = false;
+		centroid = new Point(area.getCentroid());
+	}
+
+	public Alert getAlert() {
+		return alert;
+	}
 
 	public String getId() {
 		return Long.toString(db_id);
@@ -67,61 +122,6 @@ public class Hazard {
 
 	public boolean isExpired() {
 		return expires.before(new Date());
-	}
-
-	public Hazard() {
-		alert = null;
-	}
-
-	public Alert getAlert() {
-		if (null == alert) {
-			Hazard h = Database.getInstance().safeGetByHazardId(getId());
-			alert = h.alert;
-		}
-		return alert;
-	}
-
-	public Hazard(Alert alert) {
-		new Assert(1 == alert.getInfoCount());
-		this.alert = alert;
-		initFromAlert();
-	}
-
-	public Hazard(Alert alert, int infoIndex) {
-		new Assert(infoIndex >= 0);
-		new Assert(infoIndex < alert.getInfoCount());
-		Alert.Builder b = Alert.newBuilder(alert);
-		Info info = alert.getInfo(infoIndex);
-		b.clearInfo();
-		b.addInfo(info);
-		this.alert = b.build();
-		initFromAlert();
-	}
-
-	private void initFromAlert() {
-		fullName = getFullName(alert);
-		new Assert(1 == alert.getInfoCount());
-		Info info = alert.getInfo(0);
-		new Assert(info.hasLanguage());
-		new Assert(info.hasEffective());
-		new Assert(info.hasExpires());
-		new Assert(info.hasCertainty());
-		new Assert(info.hasUrgency());
-		new Assert(info.hasSeverity());
-		new Assert(info.hasSenderName());
-		new Assert(info.hasEvent());
-		new Assert(1 == info.getAreaCount());
-		if (getInfo().hasEffective()) {
-			setEffective(Util.parse3339(getInfo().getEffective()));
-		}
-		else {
-			setEffective(Util.parse3339(alert.getSent()));
-		}
-		setExpires(Util.parse3339(getInfo().getExpires()));
-		area = CommonUtil.cap_to_jts(alert); //TODO: switch to multi-polygon?
-		computeBoundingBox(); // TODO only need to do when saving to DB - does this belong here?
-		visible = false;
-		centroid = new Point(area.getCentroid());
 	}
 
 	public static String getFullName(Alert a) {
@@ -175,6 +175,14 @@ public class Hazard {
 		return this.centroid;
 	}
 
+	public String getSourceUrl() {
+		return sourceUrl;
+	}
+
+	public void setSourceUrl(String sourceUrl) {
+		this.sourceUrl = sourceUrl;
+	}
+
 	//TODO: literally an accident waiting to happen, unit test?
 	public boolean exceedsThreshold(Urgency u, Severity s, Certainty c) {
 		Info info0 = getAlert().getInfo(0);
@@ -221,8 +229,8 @@ public class Hazard {
 	 * Events
 	 */
 	public void onNew(Context ctx) {
-		Location loc = Util.getLocation(ctx);
-		if (contains(Util.toPoint(loc))) {
+		Location loc = U.getLocation(ctx);
+		if (contains(U.toPoint(loc))) {
 			onEnter(ctx);
 		}
 	}
