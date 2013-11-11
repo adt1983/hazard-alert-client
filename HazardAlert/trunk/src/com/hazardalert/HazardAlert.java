@@ -1,5 +1,7 @@
 package com.hazardalert;
 
+import java.util.Set;
+
 import org.acra.annotation.ReportsCrashes;
 
 import android.annotation.SuppressLint;
@@ -114,6 +116,20 @@ public class HazardAlert extends Application {
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
 		Editor editor = sp.edit();
 		editor.putString(key, value);
+		if (!editor.commit()) {
+			throw new RuntimeException(key);
+		}
+	}
+
+	public static Set<String> getPreference(Context context, String key, Set<String> defaultValue) {
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+		return sp.getStringSet(key, defaultValue);
+	}
+
+	public static void setPreference(Context context, String key, Set<String> value) {
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+		Editor editor = sp.edit();
+		editor.putStringSet(key, value);
 		if (!editor.commit()) {
 			throw new RuntimeException(key);
 		}

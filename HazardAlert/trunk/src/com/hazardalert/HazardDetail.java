@@ -72,6 +72,7 @@ public class HazardDetail extends FragmentActivity {
 		((TextView) this.findViewById(R.id.alert_effective)).setText("Effective: " + h.getEffectiveString());
 		((TextView) this.findViewById(R.id.alert_expires)).setText("Expires: " + h.getExpiresString());
 		((TextView) this.findViewById(R.id.alert_areadesc)).setText("Affected Area: " + area.getAreaDesc());
+		((TextView) this.findViewById(R.id.alert_sourceUrl)).setText("Original Source: " + h.getSourceUrl());
 	}
 
 	private void setTextView(int id, Urgency urgency) {

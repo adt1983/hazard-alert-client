@@ -14,7 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class HazardListFragment extends ListFragment implements DataSubscriber {
+public class HazardListFragment extends ListFragment implements DataManager.Subscriber {
 	public static final String TAG = "HazardListFragment";
 
 	class HazardListAdapter extends ArrayAdapter<Hazard> {
@@ -78,7 +78,6 @@ public class HazardListFragment extends ListFragment implements DataSubscriber {
 			hazards.add(e.getValue());
 		}
 		HazardListAdapter adapter = new HazardListAdapter(getActivity(), R.layout.hazard_list_item, R.id.hazard_list_item_event, hazards);
-		//HazardListAdapter adapter = new HazardListAdapter(getActivity(), R.layout.hazard_list_item, R.id.hazard_list_item_tv, hazards);
 		this.setListAdapter(adapter);
 	}
 }

@@ -50,6 +50,11 @@
                 <category android:name="android.intent.category.HOME" />
             </intent-filter>
         </receiver>
+        <receiver android:name="OnConnectivityChange" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
         <receiver
             android:name="com.google.android.gcm.GCMBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
@@ -68,10 +73,8 @@
         <service android:name="com.hazardalert.GCMIntentService" />
         <service android:name="com.hazardalert.OnHazardVisible" />
         <service android:name="com.hazardalert.OnLocationRefresh" />
-        <service android:name="com.hazardalert.OnRegisterGCM" />
         <service android:name="com.hazardalert.OnStart" />
         <service android:name="com.hazardalert.OnUpdateSubscription" />
-        <service android:name="com.hazardalert.OnRecenterSubscription" />
 
         <!-- Not sure about configChanges: http://stackoverflow.com/questions/7818717/why-not-use-always-androidconfigchanges-keyboardhiddenorientation -->
         <activity
@@ -93,18 +96,38 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
+            android:name=".activity.Filter"
+            android:label="Filter Your Search"
+            android:parentActivityName=".MainActivity" >
+        </activity>
+        <activity
+            android:name=".activity.SenderFilter"
+            android:label="Filter by Sender"
+            android:parentActivityName=".activity.SenderFilter" >
+        </activity>
+        <activity
             android:name=".SettingsActivity"
+            android:label="Notification Settings"
             android:parentActivityName=".MainActivity" >
         </activity>
         <activity
             android:name=".ActiveHazardActivity"
             android:parentActivityName=".MainActivity" >
         </activity>
+        <activity
+            android:name=".activity.SenderSettings"
+            android:label="Allowed Senders" >
+            <intent-filter>
+                <action android:name="com.hazardalert.action.ACTION_SENDER_FILTER" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <!--
         Release Key - Will only work in Release Mode. If you want to run in Debug Mode, you need to generate your own Cert 
         https://developers.google.com/maps/documentation/android/start 
-        http://stackoverflow.com/questions/4361942/one-google-maps-key-for-multiple-developers-android-eclipse-custom-keystore
+        http://stackoverflow.com/questions/4361942/one-google-maps-key-for-multiple-developers-android-eclipse-custom-keystore
         -->
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"

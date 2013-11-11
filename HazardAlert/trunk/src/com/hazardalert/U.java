@@ -12,9 +12,10 @@ import android.net.NetworkInfo;
 import android.text.format.Time;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.hazardalert.common.CommonUtil;
 import com.hazardalert.common.Point;
 
-public final class Util {
+public final class U extends CommonUtil {
 	private static final Time sTime = new Time();
 
 	public static Date parse3339(String time) {
@@ -37,7 +38,7 @@ public final class Util {
 			Log.d("Unknown Location!");
 			loc = new Location(provider);
 		}
-		Log.v("Provider: " + provider + " Lat: " + loc.getLatitude() + " Lng: " + loc.getLongitude());
+		Log.v("Provider: " + provider + " Lng: " + loc.getLongitude() + " Lat: " + loc.getLatitude());
 		return loc;
 	}
 

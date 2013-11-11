@@ -16,6 +16,7 @@ import android.widget.DatePicker;
 
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.hazardalert.activity.Filter;
 import com.hazardalert.common.AlertFilter;
 
 public class MainActivity extends FragmentActivity {
@@ -24,8 +25,6 @@ public class MainActivity extends FragmentActivity {
 	private DataManagerFragment dataFragment;
 
 	private BaseMapFragment mapFragment;
-
-	private EditFilterFragment editFilterFragment;
 
 	private HazardListFragment listFragment;
 
@@ -38,7 +37,7 @@ public class MainActivity extends FragmentActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.d();
+		Log.v();
 		setContentView(R.layout.activity_main);
 		setupFragments();
 		showFragment(getVisibleFragment(savedInstanceState));
@@ -55,9 +54,6 @@ public class MainActivity extends FragmentActivity {
 		else if (listFragment.getTag().equals(visibleFragmentTag)) {
 			return listFragment;
 		}
-		else if (editFilterFragment.getTag().equals(visibleFragmentTag)) {
-			return editFilterFragment;
-		}
 		else {
 			throw new RuntimeException();
 		}
@@ -66,14 +62,14 @@ public class MainActivity extends FragmentActivity {
 	@Override
 	public void onStart() {
 		super.onStart();
-		Log.d();
+		Log.v();
 		EasyTracker.getInstance(this).activityStart(this);
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
-		Log.d();
+		Log.v();
 		EasyTracker.getInstance(this).activityStop(this);
 	}
 
@@ -88,32 +84,25 @@ public class MainActivity extends FragmentActivity {
 		// If the activity is killed while in BG, it's possible that the
 		// fragment still remains in the FragmentManager, so, we don't need to
 		// add it again.
-		dataFragment = (DataManagerFragment) getSupportFragmentManager().findFragmentByTag(DataManagerFragment.TAG);
-		if (dataFragment == null) {
-			dataFragment = new DataManagerFragment();
-			ft.add(dataFragment, DataManagerFragment.TAG);
-		}
 		mapFragment = (BaseMapFragment) getSupportFragmentManager().findFragmentByTag(BaseMapFragment.TAG);
 		if (mapFragment == null) {
 			mapFragment = new BaseMapFragment();
-			mapFragment.setDataManager(dataFragment);
 			ft.add(R.id.fragment_container, mapFragment, BaseMapFragment.TAG);
 		}
 		ft.hide(mapFragment);
 		listFragment = (HazardListFragment) getSupportFragmentManager().findFragmentByTag(HazardListFragment.TAG);
 		if (listFragment == null) {
 			listFragment = new HazardListFragment();
-			listFragment.setDataManager(dataFragment);
 			ft.add(R.id.fragment_container, listFragment, HazardListFragment.TAG);
 		}
 		ft.hide(listFragment);
-		editFilterFragment = (EditFilterFragment) getSupportFragmentManager().findFragmentByTag(EditFilterFragment.TAG);
-		if (null == editFilterFragment) {
-			editFilterFragment = new EditFilterFragment();
-			editFilterFragment.setDataManager(dataFragment);
-			ft.add(R.id.fragment_container, editFilterFragment, EditFilterFragment.TAG);
+		dataFragment = (DataManagerFragment) getSupportFragmentManager().findFragmentByTag(DataManagerFragment.TAG);
+		if (dataFragment == null) {
+			dataFragment = new DataManagerFragment();
+			ft.add(dataFragment, DataManagerFragment.TAG);
 		}
-		ft.hide(editFilterFragment);
+		mapFragment.setDataManager(dataFragment); // possible DM was killed but mapFrag remained alive
+		listFragment.setDataManager(dataFragment);
 		ft.commit();
 	}
 
@@ -137,7 +126,7 @@ public class MainActivity extends FragmentActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		Log.d();
+		Log.v();
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		if (this.visibleFragment == this.mapFragment) {
 			menu.findItem(R.id.action_map).setVisible(false);
@@ -148,11 +137,6 @@ public class MainActivity extends FragmentActivity {
 			menu.findItem(R.id.action_list).setVisible(false);
 			menu.findItem(R.id.action_map).setVisible(true);
 			menu.findItem(R.id.action_search).setVisible(true);
-		}
-		else if (this.visibleFragment == this.editFilterFragment) {
-			menu.findItem(R.id.action_search).setVisible(false);
-			menu.findItem(R.id.action_list).setVisible(true);
-			menu.findItem(R.id.action_map).setVisible(true);
 		}
 		else {
 			throw new RuntimeException();
@@ -166,21 +150,31 @@ public class MainActivity extends FragmentActivity {
 	}
 
 	public boolean onShowList(MenuItem view) {
-		Log.d();
+		Log.v();
 		showFragment(listFragment);
 		return true;
 	}
 
 	public boolean onShowMap(MenuItem view) {
-		Log.d();
+		Log.v();
 		showFragment(mapFragment);
 		return true;
 	}
 
 	public boolean onShowEditFilter(MenuItem view) {
-		Log.d();
-		showFragment(editFilterFragment);
+		Log.v();
+		Filter.startForResult(this, dataFragment.getFilter(), C.RequestCode.FILTER.ordinal());
 		return true;
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == C.RequestCode.FILTER.ordinal()) {
+			if (null != data) {
+				dataFragment.setFilter(Filter.parseResult(data));
+			}
+		}
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	public boolean onActiveHazards(MenuItem menuItem) {

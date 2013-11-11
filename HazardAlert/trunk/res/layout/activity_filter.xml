@@ -16,6 +16,15 @@
             android:text="Allow Test Alerts" >
         </CheckBox>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:gravity="right"
+            android:onClick="onSenderFilter"
+            android:text="Filter By Sender >"
+            android:textSize="18sp" />
+
         <LinearLayout
             android:id="@+id/edit_filter_ll"
             android:layout_width="match_parent"
@@ -35,6 +44,7 @@
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:onClick="onReset"
                 android:text="Reset" />
 
             <Button
@@ -42,7 +52,8 @@
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="OK" />
+                android:onClick="onOk"
+                android:text="Ok" />
         </LinearLayout>
     </LinearLayout>
 

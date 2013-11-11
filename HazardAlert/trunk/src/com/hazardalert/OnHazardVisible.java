@@ -1,5 +1,7 @@
 package com.hazardalert;
 
+import java.sql.SQLException;
+
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -38,6 +40,9 @@ public class OnHazardVisible extends IntentService {
 		if (!allowNotif) {
 			return;
 		}
+		if (isSenderSuppressed(context, h)) {
+			return;
+		}
 		final NotificationManager mNM = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		Info info0 = h.getAlert().getInfo(0);
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_hazardalert)
@@ -58,5 +63,16 @@ public class OnHazardVisible extends IntentService {
 		PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 		builder.setContentIntent(pendingIntent);
 		mNM.notify(mId++, builder.build());
+	}
+
+	private boolean isSenderSuppressed(Context ctx, Hazard h) {
+		try {
+			Sender s = Sender.find(ctx, h.getAlert().getSender());
+			return s.getSuppress();
+		}
+		catch (SQLException e) {
+			Log.e(); //FIXME log error
+			return false; // default to not suppressed
+		}
 	}
 }

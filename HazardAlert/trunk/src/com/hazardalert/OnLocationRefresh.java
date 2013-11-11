@@ -1,13 +1,10 @@
 package com.hazardalert;
 
-import java.util.Date;
-
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 
-import com.google.android.gcm.GCMRegistrar;
 import com.google.android.gms.location.LocationClient;
 
 public class OnLocationRefresh extends IntentService {
@@ -26,7 +23,7 @@ public class OnLocationRefresh extends IntentService {
 			throw new RuntimeException();
 		}
 		final Context ctx = getApplicationContext();
-		Util.setLastLocation(ctx, loc);
+		U.setLastLocation(ctx, loc);
 		/*
 		final Context context = getApplicationContext();
 		
@@ -42,18 +39,6 @@ public class OnLocationRefresh extends IntentService {
 		}
 		for (Hazard h : db.getHazardExiting(loc)) {
 			h.onExit(ctx);
-		}
-		ensureGCM();
-	}
-
-	// Restart GCM if we haven't heard from it in awhile
-	private void ensureGCM() {
-		final long MAX_GCM_IDLE = 3 * 60 * 60 * 1000; // 3 hours
-		if (MAX_GCM_IDLE < new Date().getTime() - HazardAlert.getPreference(getApplicationContext(), "lastGCM", 0)) {
-			HazardAlert.setPreference(getApplicationContext(), "lastGCM", new Date().getTime());
-			GCMRegistrar.unregister(getApplicationContext());
-			Intent registerGCM = new Intent(getApplicationContext(), OnRegisterGCM.class);
-			startService(registerGCM);
 		}
 	}
 }
