@@ -46,17 +46,13 @@ public class SenderFilterListFragment extends ListFragment implements LoaderMana
 
 		@Override
 		public View getView(final int position, View convertView, ViewGroup parent) {
+			Log.v();
 			final View row = super.getView(position, convertView, parent);
 			final Sender s = getItem(position);
 			((TextView) row.findViewById(R.id.sender_list_item_name)).setText(s.getName());
 			((TextView) row.findViewById(R.id.sender_list_item_url)).setText(s.getUrl().replace("'", ""));
 			CheckBox allowed = (CheckBox) row.findViewById(R.id.sender_list_allowed);
-			if (null == filter.getSenders()) {
-				allowed.setChecked(true);
-			}
-			else {
-				allowed.setChecked(filter.hasSender(s.getId()) ? true : false);
-			}
+			allowed.setChecked(!s.getSuppress());
 			allowed.setOnCheckedChangeListener(new OnCheckChange(s));
 			return row;
 		}
@@ -65,6 +61,7 @@ public class SenderFilterListFragment extends ListFragment implements LoaderMana
 	private AlertFilter filter;
 
 	public static SenderFilterListFragment newInstance(AlertFilter filter) {
+		Log.v();
 		SenderFilterListFragment f = new SenderFilterListFragment();
 		Bundle b = new Bundle();
 		b.putSerializable("FILTER", filter);
@@ -75,6 +72,7 @@ public class SenderFilterListFragment extends ListFragment implements LoaderMana
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.v();
 		Bundle b = getArguments();
 		new Assert(null != b);
 		filter = (AlertFilter) b.getSerializable("FILTER");
@@ -92,6 +90,11 @@ public class SenderFilterListFragment extends ListFragment implements LoaderMana
 	public void onLoadFinished(Loader<List<Sender>> arg0, List<Sender> results) {
 		Log.v();
 		ArrayList<Sender> ar = new ArrayList<Sender>(results);
+		if (null != filter.getSenders()) {
+			for (Sender s : ar) {
+				s.setSuppress(filter.hasSender(s.getId()) ? false : true);
+			}
+		}
 		ListAdapter adapter = new SenderFilterListAdapter(getActivity(), R.layout.sender_list_item, R.id.sender_list_item_name, ar);
 		setListAdapter(adapter);
 	}
