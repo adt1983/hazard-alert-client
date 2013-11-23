@@ -15,9 +15,7 @@ import com.appspot.hazard_alert.alertendpoint.model.Subscription;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.hazardalert.common.AlertFilter;
 import com.hazardalert.common.Bounds;
-import com.hazardalert.common.CommonUtil;
 import com.hazardalert.common.Point;
-import com.vividsolutions.jts.geom.Envelope;
 
 /*
  * Establish/Verify connection with server. Called upon application start, periodic heartbeats,
@@ -85,7 +83,7 @@ public class OnUpdateSubscription extends IntentService {
 		final Context ctx = getApplicationContext();
 		AlertAPI alertAPI = new AlertAPI();
 		Point lastLocation = U.getLastLocation(ctx);
-		Envelope env = CommonUtil.getBoundingBox(lastLocation.toCoordinate(), C.SUB_RADIUS_KM);
+		Bounds bounds = new Bounds(lastLocation, C.SUB_RADIUS_KM);
 		Database db = Database.getInstance(ctx);
 		long l = HazardAlert.getPreference(ctx, C.SP_SUBSCRIPTION_ID, 0);
 		Long subId = Long.valueOf(l);
@@ -97,16 +95,16 @@ public class OnUpdateSubscription extends IntentService {
 			}
 			if (s == null || null == s.getId()) {
 				Log.v("Creating new subscription. {gcm: " + regId + "}");
-				s = alertAPI.createSubscription(regId, new Bounds(env), expires);
+				s = alertAPI.createSubscription(regId, bounds, expires);
 				HazardAlert.setPreference(ctx, C.SP_SUBSCRIPTION_ID, s.getId());
-				AlertFilter filter = new AlertFilter().setInclude(new Bounds(env));
+				AlertFilter filter = new AlertFilter().setInclude(bounds);
 				List<AlertTransport> existingAlerts = alertAPI.list(filter);
 				db.insertAlerts(ctx, existingAlerts);
 			}
 			else {
 				Log.v("Updating subscription. {gcm: " + regId + "}");
 				s = new Subscription().setId(subId).setGcm(regId);
-				List<AlertTransport> newAlerts = alertAPI.updateSubscription(s, env);
+				List<AlertTransport> newAlerts = alertAPI.updateSubscription(s, bounds.toEnvelope());
 				alertAPI.updateExpires(s, expires);
 				db.insertAlerts(ctx, newAlerts);
 			}
