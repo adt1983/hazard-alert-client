@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hazardalert"
-    android:versionCode="9"
-    android:versionName="2013.11.22" >
+    android:versionCode="10"
+    android:versionName="2013.11.23" >
 
     <!-- Need SDK 8+ for GCM -->
     <!-- Need SDK 9+ for Strict Mode -->
@@ -126,7 +126,7 @@
         <!--
         Release Key - Will only work in Release Mode. If you want to run in Debug Mode, you need to generate your own Cert 
         https://developers.google.com/maps/documentation/android/start 
-        http://stackoverflow.com/questions/4361942/one-google-maps-key-for-multiple-developers-android-eclipse-custom-keystore
+        http://stackoverflow.com/questions/4361942/one-google-maps-key-for-multiple-developers-android-eclipse-custom-keystore
         -->
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
