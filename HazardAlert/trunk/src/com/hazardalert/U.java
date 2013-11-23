@@ -18,6 +18,8 @@ import com.hazardalert.common.Point;
 public final class U extends CommonUtil {
 	private static final Time sTime = new Time();
 
+	private static Point lastLocation = null;
+
 	public static Date parse3339(String time) {
 		try {
 			sTime.parse3339(time);
@@ -28,35 +30,44 @@ public final class U extends CommonUtil {
 		}
 	}
 
-	public static Location getLocation(Context c) {
-		LocationManager lm = (LocationManager) c.getSystemService(Context.LOCATION_SERVICE);
-		Criteria criteria = new Criteria();
-		criteria.setCostAllowed(false);
-		String provider = lm.getBestProvider(criteria, true);
-		Location loc = lm.getLastKnownLocation(provider);
-		if (null == loc) {
-			Log.d("Unknown Location!");
-			loc = new Location(provider);
-		}
-		Log.v("Provider: " + provider + " Lng: " + loc.getLongitude() + " Lat: " + loc.getLatitude());
-		return loc;
-	}
-
 	public static boolean hasLastLocation(Context ctx) {
 		return HazardAlert.containsPreference(ctx.getApplicationContext(), C.SP_LAST_LAT)
 				&& HazardAlert.containsPreference(ctx.getApplicationContext(), C.SP_LAST_LNG);
 	}
 
 	public static Point getLastLocation(Context ctx) {
-		return new Point(//
-							HazardAlert.getPreference(ctx.getApplicationContext(), C.SP_LAST_LAT, 0.0f),
-							HazardAlert.getPreference(ctx.getApplicationContext(), C.SP_LAST_LNG, 0.0f));
+		if (null != lastLocation) {
+			Log.d("Lng: " + lastLocation.getLng() + " Lat: " + lastLocation.getLat() + " Source: Cache");
+			return lastLocation;
+		}
+		LocationManager lm = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
+		Criteria criteria = new Criteria();
+		criteria.setCostAllowed(false);
+		String provider = lm.getBestProvider(criteria, true);
+		Location loc = null == provider ? null : lm.getLastKnownLocation(provider);
+		if (null != loc) {
+			Log.d("Lng: " + loc.getLongitude() + " Lat: " + loc.getLatitude() + " Source: LocationManager Provider: " + provider);
+			lastLocation = U.toPoint(loc);
+			return lastLocation;
+		}
+		if (!hasLastLocation(ctx)) {
+			// No cache. No providers. No database. Default to 0.0, 0.0?
+			Log.e("No clue where we are.");
+		}
+		lastLocation = new Point(//
+									HazardAlert.getPreference(ctx.getApplicationContext(), C.SP_LAST_LAT, 0.0f),
+									HazardAlert.getPreference(ctx.getApplicationContext(), C.SP_LAST_LNG, 0.0f));
+		Log.d("Lng: " + lastLocation.getLng() + " Lat: " + lastLocation.getLat() + " Source: Disk");
+		return getLastLocation(ctx);
 	}
 
 	public static void setLastLocation(Context ctx, Location loc) {
 		if (null == loc) {
-			return;
+			Log.e("null == loc");
+			return; // TODO: Assert false?
 		}
+		Log.d("Lng: " + loc.getLongitude() + " Lat: " + loc.getLatitude() + " Provider: " + loc.getProvider());
+		lastLocation = U.toPoint(loc);
 		HazardAlert.setPreference(ctx.getApplicationContext(), C.SP_LAST_LAT, (float) loc.getLatitude());
 		HazardAlert.setPreference(ctx.getApplicationContext(), C.SP_LAST_LNG, (float) loc.getLongitude());
 	}

@@ -1,12 +1,23 @@
 package com.hazardalert;
 
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
+
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
+import android.text.Html;
 import android.text.util.Linkify;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
 import com.google.publicalerts.cap.Alert;
@@ -18,6 +29,14 @@ import com.google.publicalerts.cap.Info.Urgency;
 import com.hazardalert.common.CommonUtil;
 
 public class HazardDetail extends FragmentActivity {
+	private Hazard h = null;
+
+	private Alert alert = null;
+
+	private Info info = null;
+
+	private Area area = null;
+
 	public static void start(Context ctx, Hazard h) {
 		Intent intent = new Intent(ctx, HazardDetail.class);
 		intent.putExtra("id", h.getId());
@@ -26,15 +45,16 @@ public class HazardDetail extends FragmentActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Log.d();
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.hazard_detail);
 		String id = getIntent().getStringExtra("id");
 		Database db = Database.getInstance(this);
-		Hazard h = db.safeGetByHazardId(id);
+		h = db.safeGetByHazardId(id);
 		Log.d(h.getFullName());
-		final Alert alert = h.getAlert();
-		final Info info = h.getInfo();
-		final Area area = h.getArea();
+		alert = h.getAlert();
+		info = h.getInfo();
+		area = h.getArea();
 		this.setContentView(R.layout.hazard_detail);
 		if (Alert.Scope.PUBLIC != alert.getScope() || Alert.Status.ACTUAL != alert.getStatus()) {
 			((LinearLayout) this.findViewById(R.id.alert_test_scope)).setVisibility(View.VISIBLE);
@@ -136,6 +156,86 @@ public class HazardDetail extends FragmentActivity {
 			return R.color.Green;
 		default:
 			return R.color.Purple;
+		}
+	}
+
+	private ShareActionProvider mShareActionProvider;
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		Log.d();
+		getMenuInflater().inflate(R.menu.activity_hazard_detail, menu);
+		return true;/*
+					new Assert(null != h);
+					// Inflate menu resource file.
+					getMenuInflater().inflate(R.menu.activity_hazard_detail, menu);
+					// Locate MenuItem with ShareActionProvider
+					MenuItem item = menu.findItem(R.id.menu_item_share);
+					// Fetch and store ShareActionProvider
+					mShareActionProvider = (ShareActionProvider) item.getActionProvider();
+					Intent shareIntent;
+					String hazardLink = h.getInfo().hasWeb() ? h.getInfo().getWeb() : h.getSourceUrl();
+					String html = "<a href=\"" + hazardLink + "\">" + h.getInfo().getEvent()
+					+ "</a> via <a href=\"https://play.google.com/store/apps/details?id=com.hazardalert\">Hazard Alert</a>";
+					if (h.getInfo().hasWeb()) {
+					shareIntent = ShareCompat.IntentBuilder.from(this).setType("text/html").setHtmlText(html).getIntent();
+					//shareIntent = ShareCompat.IntentBuilder.from(this).setType("text/html").setText(h.getInfo().getWeb() + link).getIntent();
+					}
+					else {
+					shareIntent = ShareCompat.IntentBuilder.from(this).setType("text/html").setHtmlText(html).getIntent();
+					//shareIntent = ShareCompat.IntentBuilder.from(this).setType("text/html").setText(h.getSourceUrl() + link).getIntent();
+					}
+					mShareActionProvider.setShareIntent(shareIntent);
+					return super.onCreateOptionsMenu(menu);*/
+	}
+
+	public boolean onShare(MenuItem menuItem) {
+		final NavigableMap<String, Intent> intentMap = new TreeMap<String, Intent>(); // packageName -> Intent
+		final Intent sendIntent = new Intent(android.content.Intent.ACTION_SEND).setType("text/plain");
+		List<ResolveInfo> handlers = getPackageManager().queryIntentActivities(sendIntent, 0);
+		final String hazardLink = h.getInfo().hasWeb() ? h.getInfo().getWeb() : h.getSourceUrl();
+		final String appLink = "https://play.google.com/store/apps/details?id=com.hazardalert";
+		final String linkText = info.getEvent() + " (" + hazardLink + ") via Hazard Alert (" + appLink + ")";
+		final String linkHtml = "<a href=\"" + hazardLink + "\">" + h.getInfo().getEvent() + "</a> via <a href=\"" + appLink
+				+ "\">Hazard Alert</a>";
+		for (ResolveInfo ri : handlers) {
+			final String packageName = ri.activityInfo.packageName;
+			Log.d("Found handler: " + packageName);
+			Intent targetedIntent = new Intent(android.content.Intent.ACTION_SEND);
+			targetedIntent.setType("text/plain");
+			if (packageName.startsWith("com.facebook")) {
+				//http://stackoverflow.com/questions/8771333/android-share-intent-for-facebook-share-text-and-link
+				targetedIntent.setType("text/plain");
+				targetedIntent.putExtra(Intent.EXTRA_TEXT, hazardLink);
+			}
+			else if (packageName.startsWith("com.twitter")) {
+				targetedIntent.setType("text/plain");
+				targetedIntent.putExtra(Intent.EXTRA_TEXT, linkText);
+			}
+			else if (packageName.startsWith("com.google.android.gm")) {
+				//targetedIntent.setType("message/rfc822");
+				targetedIntent.putExtra(Intent.EXTRA_SUBJECT, h.getInfo().getEvent());
+				targetedIntent.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(linkHtml));
+			}
+			else {
+				targetedIntent.setType("text/plain");
+				targetedIntent.putExtra(Intent.EXTRA_TEXT, linkText);
+			}
+			targetedIntent.setPackage(packageName);
+			addIntent(intentMap, packageName, targetedIntent);
+		}
+		Map.Entry<String, Intent> firstEntry = intentMap.firstEntry();
+		Intent first = firstEntry.getValue();
+		intentMap.remove(firstEntry.getKey());
+		Intent chooser = Intent.createChooser(first, "Share");
+		chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentMap.values().toArray(new Parcelable[] {}));
+		startActivity(chooser);
+		return true;
+	}
+
+	private void addIntent(Map<String, Intent> map, String packageName, Intent intent) {
+		if (!map.containsKey(packageName)) {
+			map.put(packageName, intent);
 		}
 	}
 }

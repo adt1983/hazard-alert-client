@@ -8,6 +8,7 @@ import android.content.Intent;
 
 import com.appspot.hazard_alert.alertendpoint.model.AlertTransport;
 import com.google.android.gcm.GCMBaseIntentService;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
  * IntentService responsible for handling GCM messages.
@@ -61,17 +62,22 @@ public class GCMIntentService extends GCMBaseIntentService {
 	protected void onMessage(Context context, Intent intent) {
 		Log.v();
 		HazardAlert.setPreference(getApplicationContext(), "lastGCM", new Date().getTime());
-		for (long retryInterval = 100;; retryInterval *= 2) {
+		for (long retryInterval = C.ONE_SECOND_MS;; retryInterval *= 2) {
+			AlertTransport alert = null;
 			try {
-				AlertTransport alert = new AlertAPI().alertFind(intent.getStringExtra("fullName"));
+				alert = new AlertAPI().alertFind(intent.getStringExtra("fullName"));
 				Database db = Database.getInstance(context);
 				db.insertAlert(context, alert);
 				db.deleteExpired();
 				return;
 			}
+			catch (InvalidProtocolBufferException dbE) {
+				HazardAlert.logException(context, dbE);
+				return; // local DB isn't going to change it's mind
+			}
 			catch (IOException e) {
 				if (retryInterval > C.ONE_HOUR_MS) {
-					throw new RuntimeException(e);
+					throw new RuntimeException(e); // TODO handle with a pending request?
 				}
 				try {
 					Thread.sleep(retryInterval);

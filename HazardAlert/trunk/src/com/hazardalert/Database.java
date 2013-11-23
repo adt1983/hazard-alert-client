@@ -111,11 +111,11 @@ public class Database {
 
 	// columns necessary to instantiate Hazard objects
 	private final String[] builderColumns = { HazardTable.COLUMN_ID, HazardTable.COLUMN_ALERT, HazardTable.COLUMN_SOURCE_URL,
-			HazardTable.COLUMN_VISIBLE };
+			HazardTable.COLUMN_VISIBLE, HazardTable.COLUMN_NOTIFY_ACTIVE };
 
 	private final String[] headerColumns = { HazardTable.COLUMN_ID, HazardTable.COLUMN_EXPIRES, HazardTable.COLUMN_ALERT_FULL_NAME,
 			HazardTable.COLUMN_BB_NE_LAT, HazardTable.COLUMN_BB_NE_LNG, HazardTable.COLUMN_BB_SW_LAT, HazardTable.COLUMN_BB_SW_LNG,
-			HazardTable.COLUMN_VISIBLE };
+			HazardTable.COLUMN_VISIBLE, HazardTable.COLUMN_NOTIFY_ACTIVE };
 
 	public static Hazard cursorToHazard(Cursor c) {
 		Hazard h = null;
@@ -130,6 +130,7 @@ public class Database {
 			h = new Hazard(Alert.newBuilder().mergeFrom(c.getBlob(c.getColumnIndexOrThrow(HazardTable.COLUMN_ALERT))).build(), sourceUrl);
 			h.db_id = c.getLong(c.getColumnIndexOrThrow(HazardTable.COLUMN_ID));
 			h.visible = (c.getInt(c.getColumnIndexOrThrow(HazardTable.COLUMN_VISIBLE)) == 1) ? true : false;
+			h.notifyActive = (c.getInt(c.getColumnIndexOrThrow(HazardTable.COLUMN_NOTIFY_ACTIVE)) == 1) ? true : false;
 		}
 		catch (InvalidProtocolBufferException e) {
 			throw new RuntimeException(e);
@@ -141,6 +142,7 @@ public class Database {
 		Hazard h = new Hazard();
 		h.db_id = c.getLong(c.getColumnIndexOrThrow(HazardTable.COLUMN_ID));
 		h.visible = (c.getInt(c.getColumnIndexOrThrow(HazardTable.COLUMN_VISIBLE)) == 1) ? true : false;
+		h.notifyActive = (c.getInt(c.getColumnIndexOrThrow(HazardTable.COLUMN_NOTIFY_ACTIVE)) == 1) ? true : false;
 		return h;
 	}
 
@@ -161,6 +163,7 @@ public class Database {
 		values.put(HazardTable.COLUMN_BB_SW_LAT, h.bbSW.getLat());
 		values.put(HazardTable.COLUMN_BB_SW_LNG, h.bbSW.getLng());
 		values.put(HazardTable.COLUMN_VISIBLE, h.visible ? 1 : 0);
+		values.put(HazardTable.COLUMN_NOTIFY_ACTIVE, h.notifyActive ? 1 : 0);
 		values.put(HazardTable.COLUMN_STATUS, h.getAlert().getStatus().getNumber());
 		values.put(HazardTable.COLUMN_URGENCY, h.getInfo().getUrgency().getNumber());
 		values.put(HazardTable.COLUMN_SEVERITY, h.getInfo().getSeverity().getNumber());
@@ -310,6 +313,10 @@ public class Database {
 		else {
 			return db.query(HazardTable.TABLE_HAZARD, headerColumns, "visible = ?", new String[] { s }, null, null, null);
 		}
+	}
+
+	public List<Hazard> getActiveNotifications() {
+		return cursorToList(db.query(HazardTable.TABLE_HAZARD, builderColumns, "notifyActive = ?", new String[] { "1" }, null, null, null));
 	}
 
 	public List<Hazard> getListByVisible(boolean visible) {

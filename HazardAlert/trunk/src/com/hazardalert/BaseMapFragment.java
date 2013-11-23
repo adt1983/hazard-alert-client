@@ -12,7 +12,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -45,6 +44,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.hazardalert.common.AlertFilter;
 import com.hazardalert.common.Assert;
+import com.hazardalert.common.Point;
 import com.vividsolutions.jts.geom.Envelope;
 
 public class BaseMapFragment extends SupportMapFragment implements DataManager.Subscriber {
@@ -88,10 +88,13 @@ public class BaseMapFragment extends SupportMapFragment implements DataManager.S
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
+			Context ctx = null == getActivity() ? null : getActivity().getApplicationContext();
+			if (null == ctx) {
+				return Boolean.FALSE;
+			}
 			if (subEnv.contains(visibleBounds.toEnvelope())) {
 				return Boolean.FALSE;
 			}
-			Context ctx = getActivity().getApplicationContext();
 			AlertFilter filter = new AlertFilter().setInclude(visibleBounds).setExclude(new Bounds(subEnv));
 			try {
 				List<AlertTransport> newAlerts = new AlertAPI().list(filter);
@@ -287,7 +290,7 @@ public class BaseMapFragment extends SupportMapFragment implements DataManager.S
 		}
 		map = getMap();
 		new Assert(null != map);
-		final Location loc = U.getLocation(getActivity());
+		final Point loc = U.getLastLocation(getActivity());
 		map.setMyLocationEnabled(true);
 		CameraUpdate camera = CameraUpdateFactory.newLatLngZoom(U.toLatLng(loc), 8.0f);
 		map.moveCamera(camera);

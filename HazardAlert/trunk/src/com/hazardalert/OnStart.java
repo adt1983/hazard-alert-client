@@ -66,6 +66,7 @@ public class OnStart extends IntentService implements GooglePlayServicesClient.C
 	}
 
 	private void setupLocationUpdates() {
+		Log.v();
 		Intent i = new Intent(this, OnLocationRefresh.class);
 		PendingIntent pi = PendingIntent.getService(this, 0, i, PendingIntent.FLAG_CANCEL_CURRENT);
 		LocationRequest request = LocationRequest.create();
@@ -77,6 +78,7 @@ public class OnStart extends IntentService implements GooglePlayServicesClient.C
 	}
 
 	private void setupSubscriptionUpdates() {
+		Log.v();
 		Intent subIntent = new Intent(this, OnUpdateSubscription.class);
 		PendingIntent subPendingIntent = PendingIntent.getService(this, 0, subIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 		LocationRequest updateSubscriptionRequest = LocationRequest.create();
