@@ -2,6 +2,7 @@ package com.hazardalert;
 
 import java.util.Set;
 
+import org.acra.ACRA;
 import org.acra.annotation.ReportsCrashes;
 
 import android.annotation.SuppressLint;
@@ -137,10 +138,19 @@ public class HazardAlert extends Application {
 
 	public static void logException(Context ctx, Throwable t) {
 		if (!isDebug(ctx)) {
-			org.acra.ErrorReporter.getInstance().handleSilentException(t);
+			ACRA.getErrorReporter().handleSilentException(t);
 		}
 		else {
-			Log.d("msg", t);
+			Log.e("", t);
+		}
+	}
+
+	public static void logException(Context ctx, String msg, Throwable t) {
+		if (!isDebug(ctx)) {
+			ACRA.getErrorReporter().handleSilentException(t);
+		}
+		else {
+			Log.e(msg, t);
 		}
 	}
 }

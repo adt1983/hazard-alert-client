@@ -1,11 +1,17 @@
 package com.hazardalert;
 
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.Date;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
+import android.net.Uri;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.publicalerts.cap.Alert;
@@ -49,6 +55,8 @@ public class Hazard {
 	public boolean visible; // currently affects device
 
 	private GeometryCollection area;
+
+	public boolean notifyActive; // notification id
 
 	public Hazard() {
 		alert = null;
@@ -229,8 +237,7 @@ public class Hazard {
 	 * Events
 	 */
 	public void onNew(Context ctx) {
-		Location loc = U.getLocation(ctx);
-		if (contains(U.toPoint(loc))) {
+		if (contains(U.getLastLocation(ctx))) {
 			onEnter(ctx);
 		}
 	}
@@ -238,17 +245,60 @@ public class Hazard {
 	public void onEnter(Context ctx) {
 		Log.v("OnHazardEnter: " + getFullName());
 		Database db = Database.getInstance(ctx);
+		/**/
+		final boolean allowNotif = HazardAlert.getPreferenceBoolean(ctx, C.PREF_NOTIF_ALLOW);
+		final boolean allowNotifSound = HazardAlert.getPreferenceBoolean(ctx, C.PREF_NOTIF_SOUND_ALLOW);
+		if (!allowNotif) {
+			return;
+		}
+		if (isSenderSuppressed(ctx)) {
+			return;
+		}
+		final NotificationManager mNM = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+		Info info0 = getAlert().getInfo(0);
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx).setSmallIcon(R.drawable.ic_hazardalert)
+																				.setAutoCancel(true)
+																				.setContentTitle(info0.getEvent())
+																				.setContentText("Sev: " + info0.getSeverity() + " Urg: "
+																						+ info0.getUrgency());
+		builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+		if (exceedsThreshold(Urgency.FUTURE, Severity.MODERATE, Certainty.POSSIBLE) && allowNotifSound) {
+			builder.setDefaults(Notification.DEFAULT_SOUND);
+		}
+		Intent resultIntent = new Intent(ctx, HazardDetail.class);
+		resultIntent.putExtra("id", getId());
+		resultIntent.setData(new Uri.Builder().scheme("data").appendQueryParameter("unique", getId()).build()); // http://stackoverflow.com/questions/12968280/android-multiple-notifications-and-with-multiple-intents
+		TaskStackBuilder stackBuilder = TaskStackBuilder.create(ctx);
+		stackBuilder.addParentStack(HazardDetail.class);
+		stackBuilder.addNextIntent(resultIntent);
+		PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+		builder.setContentIntent(pendingIntent);
 		visible = true;
+		notifyActive = true;
 		db.updateHazard(this);
-		Intent hazardVisible = new Intent(ctx, OnHazardVisible.class);
-		hazardVisible.putExtra("id", getId());
-		ctx.startService(hazardVisible);
+		mNM.notify((int) db_id, builder.build());
+	}
+
+	private boolean isSenderSuppressed(Context ctx) {
+		try {
+			Sender s = Sender.find(ctx, getAlert().getSender());
+			return null == s ? false : s.getSuppress();
+		}
+		catch (SQLException e) {
+			Log.e(); //FIXME log error
+			return false; // default to not suppressed
+		}
 	}
 
 	public void onExit(Context ctx) {
 		Log.v("OnHazardExit: " + getFullName());
 		Database db = Database.getInstance(ctx);
 		visible = false;
+		if (notifyActive) {
+			final NotificationManager mNM = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+			mNM.cancel((int) db_id);
+			notifyActive = false;
+		}
 		db.updateHazard(this);
 	}
 }

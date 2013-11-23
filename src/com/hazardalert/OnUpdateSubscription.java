@@ -41,6 +41,7 @@ public class OnUpdateSubscription extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		Log.v();
 		final Context ctx = getApplicationContext();
+		clearExpiredNotifications();
 		if (!U.isNetworkAvailable(ctx)) {
 			// Log a message if we have been disconnected for "too" long?
 			return;
@@ -113,6 +114,14 @@ public class OnUpdateSubscription extends IntentService {
 		catch (IOException e) {
 			Log.e("Unable to create/update subscription.", e);
 			throw new RuntimeException();
+		}
+	}
+
+	private void clearExpiredNotifications() {
+		for (Hazard h : Database.getInstance(this).getActiveNotifications()) {
+			if (h.isExpired()) {
+				h.onExit(this);
+			}
 		}
 	}
 }

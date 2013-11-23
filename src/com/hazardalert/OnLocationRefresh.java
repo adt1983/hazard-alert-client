@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.location.Location;
 
 import com.google.android.gms.location.LocationClient;
+import com.hazardalert.common.Assert;
 
 public class OnLocationRefresh extends IntentService {
 	public OnLocationRefresh() {
@@ -19,9 +20,7 @@ public class OnLocationRefresh extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		final Location loc = intent.getParcelableExtra(LocationClient.KEY_LOCATION_CHANGED);
-		if (null == loc) {
-			throw new RuntimeException();
-		}
+		new Assert(null != loc);
 		final Context ctx = getApplicationContext();
 		U.setLastLocation(ctx, loc);
 		/*
@@ -32,7 +31,6 @@ public class OnLocationRefresh extends IntentService {
 			initialize(loc);
 			initialized = true;
 		}*/
-		Log.v("Provider: " + loc.getProvider() + " Lat: " + loc.getLatitude() + " Lng: " + loc.getLongitude());
 		Database db = Database.getInstance(ctx);
 		for (Hazard h : db.getHazardEntering(loc)) {
 			h.onEnter(ctx);
