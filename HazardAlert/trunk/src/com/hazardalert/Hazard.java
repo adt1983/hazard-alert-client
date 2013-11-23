@@ -24,9 +24,7 @@ import com.hazardalert.common.Assert;
 import com.hazardalert.common.Bounds;
 import com.hazardalert.common.CommonUtil;
 import com.hazardalert.common.Point;
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 
 public class Hazard {
@@ -165,10 +163,9 @@ public class Hazard {
 	}
 
 	public boolean intersects(LatLngBounds bounds) {
-		Coordinate ne = new Point(bounds.northeast.latitude, bounds.northeast.longitude).toCoordinate();
-		Coordinate sw = new Point(bounds.southwest.latitude, bounds.southwest.longitude).toCoordinate();
-		Geometry g = CommonUtil.createBoundingBox(ne, sw);
-		return area.intersects(g);
+		Point ne = new Point(bounds.northeast.latitude, bounds.northeast.longitude);
+		Point sw = new Point(bounds.southwest.latitude, bounds.southwest.longitude);
+		return area.intersects(new Bounds(ne, sw).toPolygon());
 	}
 
 	public String getHeadline() {
