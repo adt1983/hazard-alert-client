@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hazardalert"
-    android:versionCode="11"
+    android:versionCode="12"
     android:versionName="2013.11.24" >
 
     <!-- Need SDK 8+ for GCM -->
