@@ -69,6 +69,7 @@ public class Sender {
 		sender = c.getString(c.getColumnIndexOrThrow("sender"));
 		name = c.getString(c.getColumnIndexOrThrow("name"));
 		url = c.getString(c.getColumnIndexOrThrow("url"));
+		url = url.replace("'", ""); // trim quotes we added like a moron in v8 // TODO remove once all clients are v12+
 		if (-1 == c.getColumnIndex("suppress")) {
 			suppress = false;
 		}
