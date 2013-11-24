@@ -34,7 +34,7 @@ public class SenderFilterListFragment extends ListFragment implements LoaderMana
 
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean allowed) {
-				Log.d("Sender: " + sender.getName() + "\tChecked: " + allowed);
+				Log.d("Checked: " + allowed + "\t Sender: " + sender.getName());
 				sender.setSuppress(!allowed);
 			}
 		}
@@ -50,10 +50,10 @@ public class SenderFilterListFragment extends ListFragment implements LoaderMana
 			final View row = super.getView(position, convertView, parent);
 			final Sender s = getItem(position);
 			((TextView) row.findViewById(R.id.sender_list_item_name)).setText(s.getName());
-			((TextView) row.findViewById(R.id.sender_list_item_url)).setText(s.getUrl().replace("'", ""));
+			((TextView) row.findViewById(R.id.sender_list_item_url)).setText(s.getUrl());
 			CheckBox allowed = (CheckBox) row.findViewById(R.id.sender_list_allowed);
-			allowed.setChecked(!s.getSuppress());
 			allowed.setOnCheckedChangeListener(new OnCheckChange(s));
+			allowed.setChecked(!s.getSuppress());
 			return row;
 		}
 	}
