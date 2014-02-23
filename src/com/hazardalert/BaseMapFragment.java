@@ -292,7 +292,7 @@ public class BaseMapFragment extends SupportMapFragment implements DataManager.S
 		new Assert(null != map);
 		final Point loc = U.getLastLocation(getActivity());
 		map.setMyLocationEnabled(true);
-		CameraUpdate camera = CameraUpdateFactory.newLatLngZoom(U.toLatLng(loc), 8.0f);
+		CameraUpdate camera = CameraUpdateFactory.newLatLngZoom(U.toLatLng(loc), 10.0f); // roughly 25km radius?
 		map.moveCamera(camera);
 		map.setOnCameraChangeListener(new OnCameraChangeListener() {
 			@Override

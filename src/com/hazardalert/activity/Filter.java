@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.google.publicalerts.cap.Alert;
 import com.google.publicalerts.cap.Info;
 import com.hazardalert.C;
+import com.hazardalert.Log;
 import com.hazardalert.R;
 import com.hazardalert.RangeSeekBar;
 import com.hazardalert.RangeSeekBar.OnRangeSeekBarChangeListener;
@@ -81,10 +82,18 @@ public class Filter extends FilterAbstract {
 		SenderFilter.startForResult(this, filter, C.RequestCode.FILTER_SENDER.ordinal());
 	}
 
+	public void onLanguageFilter(View view) {
+		LanguageFilter.startForResult(this, filter, C.RequestCode.FILTER_LANGUAGE.ordinal());
+	}
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.v("" + requestCode + " " + resultCode);
 		if (requestCode == C.RequestCode.FILTER_SENDER.ordinal() && resultCode == RESULT_OK) {
 			filter = SenderFilter.parseResult(data);
+		}
+		if (requestCode == C.RequestCode.FILTER_LANGUAGE.ordinal() && resultCode == RESULT_OK) {
+			filter = LanguageFilter.parseResult(data);
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}

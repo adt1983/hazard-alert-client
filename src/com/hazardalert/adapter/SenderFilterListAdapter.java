@@ -1,18 +1,6 @@
 package com.hazardalert.adapter;
 
-import java.util.List;
-
-import android.content.Context;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.TextView;
-
-import com.hazardalert.Log;
-import com.hazardalert.R;
-import com.hazardalert.Sender;
-
+/*
 public class SenderFilterListAdapter extends SenderListAdapter {
 	class OnCheckChange implements CompoundButton.OnCheckedChangeListener {
 		private final Sender sender;
@@ -45,3 +33,4 @@ public class SenderFilterListAdapter extends SenderListAdapter {
 		return row;
 	}
 }
+*/

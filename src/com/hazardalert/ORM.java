@@ -18,7 +18,7 @@ public class ORM extends OrmLiteSqliteOpenHelper {
 	private static final String DATABASE_NAME = "hazardAlert.db";
 
 	// any time you make changes to your database objects, you may have to increase the database version
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 
 	private final Context ctx;
 
@@ -50,12 +50,56 @@ public class ORM extends OrmLiteSqliteOpenHelper {
 	public void onCreate(SQLiteDatabase db, ConnectionSource connectionSource) {
 		try {
 			Log.v();
+			TableUtils.createTable(connectionSource, Language.class);
 			TableUtils.createTable(connectionSource, Sender.class);
+			TableUtils.createTable(connectionSource, SupercededBy.class);
 		}
 		catch (SQLException e) {
 			Log.e("Can't create database", e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	private List<Language> getLanguages() {
+		List<Language> languages = new LinkedList<Language>();
+		Cursor c = null;
+		try {
+			c = db.rawQuery("SELECT * FROM language", null);
+			c.moveToFirst();
+			while (!c.isAfterLast()) {
+				// TODO wrap in try/catch and log a nasty exception
+				Language l = new Language(c);
+				languages.add(l);
+				c.moveToNext();
+			}
+		}
+		finally {
+			if (null != c) {
+				c.close();
+			}
+		}
+		return languages;
+	}
+
+	private List<Sender> getSenders() {
+		List<Sender> senders = new LinkedList<Sender>();
+		Cursor c = null;
+		try {
+			c = db.rawQuery("SELECT * FROM sender", null);
+			c.moveToFirst();
+			while (!c.isAfterLast()) {
+				// TODO wrap in try/catch and log a nasty exception
+				Sender s = new Sender(c);
+				senders.add(s);
+				c.moveToNext();
+			}
+		}
+		finally {
+			if (null != c) {
+				c.close();
+			}
+		}
+		return senders;
 	}
 
 	/**
@@ -67,26 +111,18 @@ public class ORM extends OrmLiteSqliteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, ConnectionSource connectionSource, int oldVersion, int newVersion) {
 		try {
 			Log.v();
-			List<Sender> senders = new LinkedList<Sender>();
-			Cursor c = null;
-			try {
-				c = db.rawQuery("SELECT * FROM sender", null);
-				c.moveToFirst();
-				while (!c.isAfterLast()) {
-					// TODO wrap in try/catch and log a nasty exception
-					Sender s = new Sender(c);
-					senders.add(s);
-					c.moveToNext();
-				}
-			}
-			finally {
-				if (null != c) {
-					c.close();
-				}
-			}
+			List<Language> languages = getLanguages();
+			List<Sender> senders = getSenders();
+			TableUtils.dropTable(connectionSource, Language.class, true);
 			TableUtils.dropTable(connectionSource, Sender.class, true);
+			TableUtils.dropTable(connectionSource, SupercededBy.class, true);
 			onCreate(db, connectionSource); // after we drop the old databases, we create the new ones
-			Dao<Sender, Long> senderDao = Sender.getDao(ctx); // must be called after onCreate
+			// must be called after onCreate
+			Dao<Language, Long> languageDao = Language.getDao(ctx);
+			for (Language l : languages) {
+				languageDao.create(l); // reload old data
+			}
+			Dao<Sender, Long> senderDao = Sender.getDao(ctx);
 			for (Sender s : senders) {
 				senderDao.create(s); // reload old data
 			}

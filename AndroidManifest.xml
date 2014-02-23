@@ -1,13 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hazardalert"
-    android:versionCode="12"
-    android:versionName="2013.11.24" >
+    android:versionCode="13"
+    android:versionName="2014.02.22" >
 
     <!-- Need SDK 8+ for GCM -->
     <!-- Need SDK 9+ for Strict Mode -->
     <!-- Need SDK 11+ for Fragments -->
     <!-- Need SDK 12+ for Play Services? -->
-    <!-- "14 is the new 8." - Mark Murphy 10/16/2013 -->
+    <!-- "14 is the new 8." - Mark Murphy 2013.10.16 -->
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="18" />
@@ -105,6 +105,11 @@
             android:parentActivityName=".activity.SenderFilter" >
         </activity>
         <activity
+            android:name=".activity.LanguageFilter"
+            android:label="Filter by Language"
+            android:parentActivityName=".activity.LanguageFilter" >
+        </activity>
+        <activity
             android:name=".SettingsActivity"
             android:label="Notification Settings"
             android:parentActivityName=".MainActivity" >
@@ -118,6 +123,15 @@
             android:label="Allowed Senders" >
             <intent-filter>
                 <action android:name="com.hazardalert.action.ACTION_SENDER_FILTER" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activity.LanguageSettings"
+            android:label="Allowed Languages" >
+            <intent-filter>
+                <action android:name="com.hazardalert.action.ACTION_LANGUAGE_FILTER" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
