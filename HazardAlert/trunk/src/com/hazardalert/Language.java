@@ -2,6 +2,7 @@ package com.hazardalert;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -92,5 +93,22 @@ public class Language {
 
 	public void setSuppress(Boolean suppress) {
 		this.suppress = suppress;
+	}
+
+	public Locale getLocale() {
+		new Assert(language.length() == 5);
+		new Assert('-' == language.charAt(2));
+		Locale locale = new Locale(language.substring(0, 2), language.substring(3, 5));
+		return locale;
+	}
+
+	public String getDisplayLanguage() {
+		Locale l = getLocale();
+		return l.getDisplayLanguage(l);
+	}
+
+	public String getDisplayCountry() {
+		Locale l = getLocale();
+		return l.getDisplayCountry(l);
 	}
 }

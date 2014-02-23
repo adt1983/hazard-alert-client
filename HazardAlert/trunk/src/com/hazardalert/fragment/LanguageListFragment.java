@@ -45,7 +45,8 @@ public abstract class LanguageListFragment extends ListFragment implements Loade
 			Log.v();
 			final View row = super.getView(position, convertView, parent);
 			final Language l = getItem(position);
-			((TextView) row.findViewById(R.id.language_list_item_name)).setText(l.getLanguage());
+			final String displayName = l.getDisplayLanguage() + " (" + l.getDisplayCountry() + ")";
+			((TextView) row.findViewById(R.id.language_list_item_name)).setText(displayName);
 			CheckBox allowed = (CheckBox) row.findViewById(R.id.language_list_allowed);
 			setOnCheckChangeListener(allowed, l);
 			allowed.setChecked(!l.getSuppress());

@@ -1,5 +1,6 @@
 package com.hazardalert;
 
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import android.support.v4.content.Loader;
 
 import com.hazardalert.common.AlertFilter;
 import com.hazardalert.common.Assert;
+import com.j256.ormlite.dao.Dao;
 
 /*
  * Not sure about this approach. Seems messy.
@@ -32,6 +34,51 @@ public class DataManagerFragment extends Fragment implements DataManager {
 		super.onCreate(savedInstanceState);
 		setRetainInstance(true);
 		// Filter defaults
+		try {
+			boolean filterNothing = true;
+			Dao<Sender, Long> dao = Sender.getDao(getActivity());
+			List<Sender> senders = dao.queryForAll();
+			for (Sender s : senders) {
+				if (s.getSuppress()) {
+					filterNothing = false;
+					break; // need to explicitly set allowed senders
+				}
+			}
+			if (!filterNothing) {
+				for (Sender s : senders) {
+					if (!s.getSuppress()) {
+						filter.addSender(s.getId());
+					}
+				}
+			}
+		}
+		catch (SQLException e) {
+			filter.setSenders(null);
+			HazardAlert.logException(getActivity(), e);
+		}
+		//Language defaults
+		try {
+			boolean filterNothing = true;
+			Dao<Language, Long> dao = Language.getDao(getActivity());
+			List<Language> languages = dao.queryForAll();
+			for (Language l : languages) {
+				if (l.getSuppress()) {
+					filterNothing = false;
+					break; // need to explicitly set allowed languages
+				}
+			}
+			if (!filterNothing) {
+				for (Language l : languages) {
+					if (!l.getSuppress()) {
+						filter.addLanguage(l.getLanguage());
+					}
+				}
+			}
+		}
+		catch (SQLException e) {
+			filter.setLanguages(null);
+			HazardAlert.logException(getActivity(), e);
+		}
 	}
 
 	@Override
