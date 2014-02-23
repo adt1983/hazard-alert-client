@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hazardalert"
-    android:versionCode="13"
-    android:versionName="2014.02.22" >
+    android:versionCode="14"
+    android:versionName="2014.02.23" >
 
     <!-- Need SDK 8+ for GCM -->
     <!-- Need SDK 9+ for Strict Mode -->
