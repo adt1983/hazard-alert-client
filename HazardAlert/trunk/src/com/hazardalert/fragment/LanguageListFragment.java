@@ -66,4 +66,11 @@ public abstract class LanguageListFragment extends ListFragment implements Loade
 	public void onLoaderReset(Loader<List<Language>> arg0) {
 		Log.v();
 	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		Log.v();
+		this.setEmptyText("No known languages. Languages will be added as you receive alerts.");
+	}
 }
