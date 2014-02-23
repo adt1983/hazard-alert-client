@@ -25,6 +25,15 @@
             android:text="Filter By Sender >"
             android:textSize="18sp" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:gravity="right"
+            android:onClick="onLanguageFilter"
+            android:text="Filter By Language >"
+            android:textSize="18sp" />
+
         <LinearLayout
             android:id="@+id/edit_filter_ll"
             android:layout_width="match_parent"

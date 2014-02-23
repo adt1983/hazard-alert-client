@@ -7,34 +7,34 @@ import android.view.View;
 import android.widget.ListAdapter;
 
 import com.google.analytics.tracking.android.EasyTracker;
+import com.hazardalert.Language;
 import com.hazardalert.R;
-import com.hazardalert.Sender;
 import com.hazardalert.common.AlertFilter;
-import com.hazardalert.fragment.SenderFilterListFragment;
+import com.hazardalert.fragment.LanguageFilterListFragment;
 
-public class SenderFilter extends FilterAbstract {
-	SenderFilterListFragment fragment;
+public class LanguageFilter extends FilterAbstract {
+	LanguageFilterListFragment fragment;
 
 	public static void startForResult(Activity activity, AlertFilter filter, int requestCode) {
-		startForResult(activity, SenderFilter.class, filter, requestCode);
+		startForResult(activity, LanguageFilter.class, filter, requestCode);
 	}
 
 	public void onOk(View view) {
 		ListAdapter adapter = fragment.getListAdapter();
-		filter.setSenders(null);
+		filter.setLanguages(null);
 		boolean filterNothing = true;
 		for (int i = 0; i < adapter.getCount(); i++) {
-			Sender s = (Sender) adapter.getItem(i);
-			if (s.getSuppress()) {
+			Language l = (Language) adapter.getItem(i);
+			if (l.getSuppress()) {
 				filterNothing = false;
-				break; // need to explicitly set allowed senders
+				break; // need to explicitly set allowed languages
 			}
 		}
 		if (!filterNothing) {
 			for (int i = 0; i < adapter.getCount(); i++) {
-				Sender s = (Sender) adapter.getItem(i);
-				if (!s.getSuppress()) {
-					filter.addSender(s.getId());
+				Language l = (Language) adapter.getItem(i);
+				if (!l.getSuppress()) {
+					filter.addLanguage(l.getLanguage());
 				}
 			}
 		}
@@ -45,10 +45,10 @@ public class SenderFilter extends FilterAbstract {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// Display the fragment as the main content.
-		this.setContentView(R.layout.activity_sender_filter);
+		this.setContentView(R.layout.activity_language_filter);
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-		fragment = SenderFilterListFragment.newInstance(filter);
-		ft.replace(R.id.sender_filter_fragment_container, fragment);
+		fragment = LanguageFilterListFragment.newInstance(filter);
+		ft.replace(R.id.language_filter_fragment_container, fragment);
 		ft.commit();
 	}
 

@@ -20,12 +20,15 @@ import android.widget.LinearLayout;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.MapBuilder;
 import com.google.publicalerts.cap.Alert;
 import com.google.publicalerts.cap.Area;
 import com.google.publicalerts.cap.Info;
 import com.google.publicalerts.cap.Info.Certainty;
 import com.google.publicalerts.cap.Info.Severity;
 import com.google.publicalerts.cap.Info.Urgency;
+import com.hazardalert.common.Assert;
 import com.hazardalert.common.CommonUtil;
 
 public class HazardDetail extends FragmentActivity {
@@ -49,6 +52,7 @@ public class HazardDetail extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.hazard_detail);
 		String id = getIntent().getStringExtra("id");
+		new Assert(null != id);
 		Database db = Database.getInstance(this);
 		h = db.safeGetByHazardId(id);
 		Log.d(h.getFullName());
@@ -230,6 +234,13 @@ public class HazardDetail extends FragmentActivity {
 		Intent chooser = Intent.createChooser(first, "Share");
 		chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentMap.values().toArray(new Parcelable[] {}));
 		startActivity(chooser);
+		// track
+		EasyTracker easyTracker = EasyTracker.getInstance(this);
+		easyTracker.send(MapBuilder.createEvent("ui_action", // Event category (required)
+												"button_press", // Event action (required)
+												"share_button", // Event label
+												null) // Event value
+									.build());
 		return true;
 	}
 
@@ -237,5 +248,17 @@ public class HazardDetail extends FragmentActivity {
 		if (!map.containsKey(packageName)) {
 			map.put(packageName, intent);
 		}
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		EasyTracker.getInstance(this).activityStart(this);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		EasyTracker.getInstance(this).activityStop(this);
 	}
 }

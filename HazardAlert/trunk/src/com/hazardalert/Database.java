@@ -68,9 +68,15 @@ public class Database {
 		byte[] bytes = Base64.decodeBase64(at.getPayload());
 		Alert alert = com.google.publicalerts.cap.Alert.parseFrom(bytes);
 		// duplicate?
-		Log.v("Got alert: " + Hazard.getFullName(alert));
-		if (alreadyExistsFullName(Hazard.getFullName(alert))) {
-			Log.v("Duplicate: " + Hazard.getFullName(alert));
+		final String fullName = Hazard.getFullName(alert);
+		Log.v("Got alert: " + fullName);
+		if (alreadyExistsFullName(fullName)) {
+			Log.v("Duplicate: " + fullName);
+			return;
+		}
+		// superceded?
+		if (SupercededBy.isSuperceded(context, fullName)) {
+			Log.v("Superceded: " + fullName + " (alerts out of order?)");
 			return;
 		}
 		for (int i = 0; i < alert.getInfoCount(); i++) {
@@ -78,12 +84,18 @@ public class Database {
 		}
 		// handle updates
 		if (alert.getMsgType() == MsgType.CANCEL || alert.getMsgType() == MsgType.UPDATE) {
-			Log.v("Got update: " + Hazard.getFullName(alert));
+			Log.v("Got update: " + fullName);
 			for (String s : alert.getReferences().getValueList()) {
 				Log.v("Cancelling: " + s);
-				List<Hazard> results = getByFullName(s);
-				for (Hazard h : results) {
-					deleteHazard(h);
+				try {
+					SupercededBy.add(context, fullName, s);
+					List<Hazard> results = getByFullName(s);
+					for (Hazard h : results) {
+						deleteHazard(h);
+					}
+				}
+				catch (SQLException e) {
+					throw new RuntimeException(e);
 				}
 			}
 		}
@@ -94,7 +106,8 @@ public class Database {
 	public void insertAlerts(Context context, List<AlertTransport> alerts) throws InvalidProtocolBufferException {
 		try {
 			db.beginTransaction();
-			for (AlertTransport at : alerts) {
+			// most recent alerts first
+			for (AlertTransport at : com.google.common.collect.Lists.reverse(alerts)) {
 				insertAlert(context, at);
 			}
 			db.setTransactionSuccessful();
@@ -104,9 +117,9 @@ public class Database {
 		}
 	}
 
-	private void insertHazard(Context context, Hazard h) {
+	private void insertHazard(Context ctx, Hazard h) {
 		insertHazardInternal(h);
-		h.onNew(context);
+		h.onNew(ctx);
 	}
 
 	// columns necessary to instantiate Hazard objects
@@ -194,8 +207,24 @@ public class Database {
 
 	public void deleteHazard(Hazard h) {
 		Log.d("Deleting " + h.toString());
+		h.onDelete(appContext);
 		if (1 != db.delete(HazardTable.TABLE_HAZARD, HazardTable.COLUMN_ID + " = ?", new String[] { Long.toString(h.db_id) })) {
 			throw new RuntimeException();
+		}
+		try {
+			SupercededBy.remove(appContext, h.getFullName());
+		}
+		catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void deleteExpired() {
+		Log.d();
+		// give alerts a one hour window
+		for (Hazard h : cursorToList(db.rawQuery(	"select * from hazard where expires < ?",
+													new String[] { Long.toString(new Date().getTime() - (C.ONE_HOUR_MS)) }))) {
+			deleteHazard(h);
 		}
 	}
 
@@ -240,13 +269,6 @@ public class Database {
 	public Cursor getAllHazardsCursor() {
 		return db.rawQuery("select * from hazard", null);
 	}*/
-	public void deleteExpired() {
-		Log.d();
-		db.delete(	HazardTable.TABLE_HAZARD,
-					HazardTable.COLUMN_EXPIRES + " < ?",
-					new String[] { Long.toString(new Date().getTime() - (C.ONE_HOUR_MS)) }); // give alerts a one hour window
-	}
-
 	public boolean alreadyExists(String id) {
 		Cursor c = null;
 		try {
@@ -280,6 +302,7 @@ public class Database {
 	}
 
 	public Hazard getByHazardId(String hazardId) {
+		new Assert(null != hazardId);
 		Hazard h = null;
 		Cursor c = null;
 		try {
@@ -298,6 +321,7 @@ public class Database {
 	}
 
 	public Hazard safeGetByHazardId(String hazardId) {
+		new Assert(null != hazardId);
 		Hazard h = getByHazardId(hazardId);
 		if (h == null) {
 			throw new RuntimeException(hazardId);
@@ -463,6 +487,14 @@ public class Database {
 			}
 			for (Iterator<Hazard> h = results.iterator(); h.hasNext();) {
 				if (!senders.contains(h.next().getAlert().getSender())) {
+					h.remove();
+				}
+			}
+		}
+		if (null != filter.getLanguages()) {
+			Set<String> allowed = new HashSet<String>(filter.getLanguages());
+			for (Iterator<Hazard> h = results.iterator(); h.hasNext();) {
+				if (!allowed.contains(h.next().getInfo().getLanguage())) {
 					h.remove();
 				}
 			}

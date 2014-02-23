@@ -23,7 +23,7 @@ import com.hazardalert.Sender;
 import com.hazardalert.loader.SenderLoader;
 import com.j256.ormlite.dao.Dao;
 
-public class SenderFilterFragment extends ListFragment implements LoaderManager.LoaderCallbacks<List<Sender>> {
+public class SenderSettingsFragment extends ListFragment implements LoaderManager.LoaderCallbacks<List<Sender>> {
 	class SenderSettingsListAdapter extends ArrayAdapter<Sender> {
 		class OnCheckChange implements CompoundButton.OnCheckedChangeListener {
 			private final Sender sender;

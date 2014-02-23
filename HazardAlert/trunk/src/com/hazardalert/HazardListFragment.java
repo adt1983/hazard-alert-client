@@ -14,6 +14,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.hazardalert.common.Assert;
+
 public class HazardListFragment extends ListFragment implements DataManager.Subscriber {
 	public static final String TAG = "HazardListFragment";
 
@@ -67,6 +69,7 @@ public class HazardListFragment extends ListFragment implements DataManager.Subs
 
 	@Override
 	public DataManager getDataManager() {
+		new Assert(null != dataManager);
 		return dataManager;
 	}
 

@@ -110,7 +110,9 @@ public class Hazard {
 	}
 
 	public String getId() {
-		return Long.toString(db_id);
+		String s = Long.toString(db_id);
+		new Assert(null != s);
+		return s;
 	}
 
 	public Date getEffective() {
@@ -234,9 +236,14 @@ public class Hazard {
 	 * Events
 	 */
 	public void onNew(Context ctx) {
+		Language.find(ctx, getInfo().getLanguage()); // create language if it is new
 		if (contains(U.getLastLocation(ctx))) {
 			onEnter(ctx);
 		}
+	}
+
+	public void onDelete(Context ctx) {
+		cancelNotify(ctx);
 	}
 
 	public void onEnter(Context ctx) {
@@ -251,8 +258,11 @@ public class Hazard {
 		if (isSenderSuppressed(ctx)) {
 			return;
 		}
-		final NotificationManager mNM = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 		Info info0 = getAlert().getInfo(0);
+		if (Language.find(ctx, info0.getLanguage()).getSuppress()) {
+			return;
+		}
+		final NotificationManager mNM = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx).setSmallIcon(R.drawable.ic_hazardalert)
 																				.setAutoCancel(true)
 																				.setContentTitle(info0.getEvent())
@@ -279,7 +289,7 @@ public class Hazard {
 	private boolean isSenderSuppressed(Context ctx) {
 		try {
 			Sender s = Sender.find(ctx, getAlert().getSender());
-			return null == s ? false : s.getSuppress();
+			return null == s ? false : s.getSuppress(); // default to not suppressed
 		}
 		catch (SQLException e) {
 			Log.e(); //FIXME log error
@@ -291,11 +301,15 @@ public class Hazard {
 		Log.v("OnHazardExit: " + getFullName());
 		Database db = Database.getInstance(ctx);
 		visible = false;
+		cancelNotify(ctx);
+		db.updateHazard(this);
+	}
+
+	private void cancelNotify(Context ctx) {
 		if (notifyActive) {
 			final NotificationManager mNM = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 			mNM.cancel((int) db_id);
 			notifyActive = false;
 		}
-		db.updateHazard(this);
 	}
 }

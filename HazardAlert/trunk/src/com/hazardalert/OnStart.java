@@ -85,7 +85,7 @@ public class OnStart extends IntentService implements GooglePlayServicesClient.C
 		updateSubscriptionRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 		updateSubscriptionRequest.setFastestInterval(C.ONE_SECOND_MS); //1s - for debugging mock locations
 		updateSubscriptionRequest.setSmallestDisplacement(C.SUB_RECENTER_RADIUS_METERS);
-		updateSubscriptionRequest.setInterval(C.ONE_HOUR_MS);
+		updateSubscriptionRequest.setInterval(8 * C.ONE_HOUR_MS);
 		locationClient.requestLocationUpdates(updateSubscriptionRequest, subPendingIntent);
 	}
 

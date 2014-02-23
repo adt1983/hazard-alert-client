@@ -56,6 +56,6 @@ public class C {
 	public static final double SUB_RADIUS_KM = 25.0;
 
 	public enum RequestCode {
-		FILTER, FILTER_SENDER, PLAY_SERVICES_RESOLUTION
+		FILTER, FILTER_SENDER, FILTER_LANGUAGE, PLAY_SERVICES_RESOLUTION
 	}
 }

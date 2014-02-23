@@ -18,5 +18,11 @@
         android:title="Allowed Senders" >
         <intent android:action="com.hazardalert.action.ACTION_SENDER_FILTER" />
     </PreferenceScreen>
+    <PreferenceScreen
+        android:key="@+id/pref_language_filter"
+        android:summary="Ignore alerts in specific languages"
+        android:title="Allowed Languages" >
+        <intent android:action="com.hazardalert.action.ACTION_LANGUAGE_FILTER" />
+    </PreferenceScreen>
 
 </PreferenceScreen>

@@ -17,6 +17,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
  * NOAA-NWS-ALERTS-FL124CD5966EA8.TornadoWarning
  * .124CD5967F74FL.MLBTORMLB.8332360c041ebd86b9d65c863919d2b7
  */
+/*
+ * TODO 2014.2.22 GCMBaseIntentService is deprecated but I don't see a compelling reason to migrate.
+ * GCMBaseIntentService wraps callbacks in a WakeLock
+ * http://stackoverflow.com/questions/16619097/problems-with-android-gcm
+ * http://code.google.com/p/gcm/source/browse/gcm-client-deprecated/src/com/google/android/gcm/GCMBaseIntentService.java?r=7f647288103bac2c5552af881f0e217c5b95d78a
+ */
 public class GCMIntentService extends GCMBaseIntentService {
 	public GCMIntentService() {
 		super(C.SENDER_ID);
@@ -73,9 +79,10 @@ public class GCMIntentService extends GCMBaseIntentService {
 			}
 			catch (InvalidProtocolBufferException dbE) {
 				HazardAlert.logException(context, dbE);
-				return; // local DB isn't going to change it's mind
+				return; // give up - local DB isn't going to change it's mind
 			}
 			catch (IOException e) {
+				// retry on network related errors
 				if (retryInterval > C.ONE_HOUR_MS) {
 					throw new RuntimeException(e); // TODO handle with a pending request?
 				}
