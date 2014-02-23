@@ -6,8 +6,6 @@ import java.util.List;
 
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ListAdapter;
 
 import com.hazardalert.Language;
@@ -16,30 +14,15 @@ import com.hazardalert.R;
 import com.j256.ormlite.dao.Dao;
 
 public class LanguageSettingsListFragment extends LanguageListFragment {
-	class OnCheckChange implements CompoundButton.OnCheckedChangeListener {
-		private final Language language;
-
-		OnCheckChange(Language s) {
-			language = s;
-		}
-
-		@Override
-		public void onCheckedChanged(CompoundButton buttonView, boolean allowed) {
-			Log.d("Language: " + language.getLanguage() + "\tChecked: " + allowed);
-			try {
-				Dao<Language, Long> dao = Language.getDao(getActivity());
-				language.setSuppress(!allowed);
-				dao.update(language);
-			}
-			catch (SQLException e) {
-				Log.e("Could not update language.suppress!", e);
-			}
-		}
-	}
-
 	@Override
-	protected void setOnCheckChangeListener(CheckBox cb, Language l) {
-		cb.setOnCheckedChangeListener(new OnCheckChange(l));
+	protected void onSetSuppress(Language l) {
+		try {
+			Dao<Language, Long> dao = Language.getDao(getActivity());
+			dao.update(l);
+		}
+		catch (SQLException e) {
+			Log.e("Could not update language.suppress!", e);
+		}
 	}
 
 	@Override

@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.hazardalert.Language;
@@ -30,8 +31,23 @@ public abstract class LanguageListFragment extends ListFragment implements Loade
 
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean allowed) {
-				//Log.d("Checked: " + allowed + "\t Language: " + sender.getName());
-				language.setSuppress(!allowed);
+				Log.d("Checked: " + allowed + "\t Language: " + language.getLanguage());
+				// ensure at least one language is allowed
+				int numAllowed = 0;
+				final ListAdapter adapter = getListAdapter();
+				for (int i = 0; i < adapter.getCount(); i++) {
+					final Language l = (Language) adapter.getItem(i);
+					if (!l.getSuppress()) {
+						numAllowed++;
+						if (numAllowed > 1 || allowed) {
+							language.setSuppress(!allowed);
+							onSetSuppress(language);
+							return;
+						}
+					}
+				}
+				// prevent checkbox change
+				((CheckBox) buttonView).setChecked(true);
 			}
 		}
 
@@ -48,13 +64,13 @@ public abstract class LanguageListFragment extends ListFragment implements Loade
 			final String displayName = l.getDisplayLanguage() + " (" + l.getDisplayCountry() + ")";
 			((TextView) row.findViewById(R.id.language_list_item_name)).setText(displayName);
 			CheckBox allowed = (CheckBox) row.findViewById(R.id.language_list_allowed);
-			setOnCheckChangeListener(allowed, l);
+			allowed.setOnCheckedChangeListener(new OnCheckChange(l));
 			allowed.setChecked(!l.getSuppress());
 			return row;
 		}
 	}
 
-	protected abstract void setOnCheckChangeListener(CheckBox cb, Language l);
+	protected abstract void onSetSuppress(Language l);
 
 	@Override
 	public Loader<List<Language>> onCreateLoader(int arg0, Bundle arg1) {
