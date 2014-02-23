@@ -5,8 +5,6 @@ import java.util.List;
 
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ListAdapter;
 
 import com.hazardalert.Language;
@@ -16,25 +14,6 @@ import com.hazardalert.common.AlertFilter;
 import com.hazardalert.common.Assert;
 
 public class LanguageFilterListFragment extends LanguageListFragment {
-	class OnCheckChange implements CompoundButton.OnCheckedChangeListener {
-		private final Language language;
-
-		OnCheckChange(Language l) {
-			language = l;
-		}
-
-		@Override
-		public void onCheckedChanged(CompoundButton buttonView, boolean allowed) {
-			//Log.d("Checked: " + allowed + "\t Language: " + sender.getName());
-			language.setSuppress(!allowed);
-		}
-	}
-
-	@Override
-	protected void setOnCheckChangeListener(CheckBox cb, Language l) {
-		cb.setOnCheckedChangeListener(new OnCheckChange(l));
-	}
-
 	private AlertFilter filter;
 
 	public static LanguageFilterListFragment newInstance(AlertFilter filter) {
@@ -68,5 +47,10 @@ public class LanguageFilterListFragment extends LanguageListFragment {
 		}
 		ListAdapter adapter = new LanguageListAdapter(getActivity(), R.layout.language_list_item, R.id.language_list_item_name, ar);
 		setListAdapter(adapter);
+	}
+
+	@Override
+	protected void onSetSuppress(Language l) {
+		// do nothing
 	}
 }

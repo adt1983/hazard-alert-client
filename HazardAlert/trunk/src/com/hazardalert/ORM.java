@@ -25,12 +25,12 @@ public class ORM extends OrmLiteSqliteOpenHelper {
 	private static ORM instance = null;
 
 	@SuppressWarnings("unused")
-	private static SQLiteDatabase db = null; // do we need this? prevent GC?
+	private static SQLiteDatabase dbInstance = null; // do we need this? prevent GC?
 
 	synchronized public static ORM getInstance(Context ctx) {
 		if (null == instance) {
 			instance = new ORM(ctx.getApplicationContext());
-			db = instance.getWritableDatabase();
+			dbInstance = instance.getWritableDatabase();
 		}
 		return instance;
 	}
@@ -60,8 +60,11 @@ public class ORM extends OrmLiteSqliteOpenHelper {
 		}
 	}
 
-	private List<Language> getLanguages() {
+	private List<Language> getLanguages(SQLiteDatabase db, int oldVersion, int newVersion) {
 		List<Language> languages = new LinkedList<Language>();
+		if (oldVersion < 4) {
+			return languages;
+		}
 		Cursor c = null;
 		try {
 			c = db.rawQuery("SELECT * FROM language", null);
@@ -81,7 +84,7 @@ public class ORM extends OrmLiteSqliteOpenHelper {
 		return languages;
 	}
 
-	private List<Sender> getSenders() {
+	private List<Sender> getSenders(SQLiteDatabase db, int oldVersion, int newVersion) {
 		List<Sender> senders = new LinkedList<Sender>();
 		Cursor c = null;
 		try {
@@ -111,8 +114,8 @@ public class ORM extends OrmLiteSqliteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, ConnectionSource connectionSource, int oldVersion, int newVersion) {
 		try {
 			Log.v();
-			List<Language> languages = getLanguages();
-			List<Sender> senders = getSenders();
+			List<Language> languages = getLanguages(db, oldVersion, newVersion);
+			List<Sender> senders = getSenders(db, oldVersion, newVersion);
 			TableUtils.dropTable(connectionSource, Language.class, true);
 			TableUtils.dropTable(connectionSource, Sender.class, true);
 			TableUtils.dropTable(connectionSource, SupercededBy.class, true);
