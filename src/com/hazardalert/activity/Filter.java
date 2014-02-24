@@ -12,6 +12,7 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.analytics.tracking.android.EasyTracker;
 import com.google.publicalerts.cap.Alert;
 import com.google.publicalerts.cap.Info;
 import com.hazardalert.C;
@@ -210,5 +211,17 @@ public class Filter extends FilterAbstract {
 		parent.addView(tv);
 		parent.addView(rsb);
 		return rsb;
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		EasyTracker.getInstance(this).activityStart(this);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		EasyTracker.getInstance(this).activityStop(this);
 	}
 }
