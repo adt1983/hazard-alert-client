@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hazardalert"
-    android:versionCode="14"
+    android:versionCode="15"
     android:versionName="2014.02.23" >
 
     <!-- Need SDK 8+ for GCM -->
@@ -9,7 +9,7 @@
     <!-- Need SDK 12+ for Play Services? -->
     <!-- "14 is the new 8." - Mark Murphy 2013.10.16 -->
     <uses-sdk
-        android:minSdkVersion="15"
+        android:minSdkVersion="14"
         android:targetSdkVersion="18" />
 
     <permission
