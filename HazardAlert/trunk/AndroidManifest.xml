@@ -9,7 +9,7 @@
     <!-- Need SDK 12+ for Play Services? -->
     <!-- "14 is the new 8." - Mark Murphy 2013.10.16 -->
     <uses-sdk
-        android:minSdkVersion="14"
+        android:minSdkVersion="15"
         android:targetSdkVersion="18" />
 
     <permission
