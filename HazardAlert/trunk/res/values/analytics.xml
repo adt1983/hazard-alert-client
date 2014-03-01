@@ -4,6 +4,9 @@
     <!-- Replace placeholder ID with your tracking ID -->
     <string name="ga_trackingId">UA-45334180-1</string>
 
+    <!-- <string name="ga_logLevel">verbose</string> -->
+
+
     <!-- Enable automatic activity tracking -->
     <bool name="ga_autoActivityTracking">true</bool>
 

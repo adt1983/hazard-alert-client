@@ -74,4 +74,12 @@ public class SupercededBy {
 	public void setSuperceded(String superceded) {
 		this.superceded = superceded;
 	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 }
