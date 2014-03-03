@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.content.Context;
 
+import com.hazardalert.common.Assert;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.field.DatabaseField;
@@ -24,14 +25,20 @@ public class SupercededBy {
 	static public void add(Context ctx, String supercededBy, String superceded) throws SQLException {
 		Dao<SupercededBy, Long> dao = getDao(ctx);
 		SupercededBy sb = new SupercededBy(supercededBy, superceded);
-		dao.create(sb);
+		int rowsCreated = dao.create(sb);
+		new Assert(1 == rowsCreated);
 	}
 
 	static public void remove(Context ctx, String supercededBy) throws SQLException {
 		Dao<SupercededBy, Long> dao = getDao(ctx);
 		List<SupercededBy> results = dao.queryForEq("supercededBy", supercededBy);
 		for (SupercededBy sb : results) {
-			dao.delete(sb);
+			try {
+				dao.delete(sb);
+			}
+			catch (SQLException e) {
+				throw new RuntimeException("sb.id: " + sb.id + " sb.supercededBy: " + sb.supercededBy + " superceded: " + sb.superceded, e);
+			}
 		}
 	}
 
