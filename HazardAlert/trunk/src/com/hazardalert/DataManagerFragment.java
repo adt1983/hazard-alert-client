@@ -124,7 +124,7 @@ public class DataManagerFragment extends Fragment implements DataManager {
 	}
 
 	@Override
-	synchronized public void reload() {
+	/*synchronized*/public void reload() {
 		if (!isAdded()) {
 			return;
 		}
