@@ -5,21 +5,28 @@
         android:icon="@drawable/ic_menu_listmode"
         android:onClick="onShowList"
         android:showAsAction="always"
-        android:title="@string/action_search">
+        android:title="@string/action_listview">
     </item>
     <item
         android:id="@+id/action_map"
         android:icon="@drawable/ic_menu_mapmode"
         android:onClick="onShowMap"
         android:showAsAction="always"
-        android:title="@string/action_search">
+        android:title="@string/action_mapview">
     </item>
     <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_action_search"
         android:onClick="onShowEditFilter"
         android:showAsAction="always"
-        android:title="@string/action_search">
+        android:title="@string/action_filter">
+    </item>
+    <item
+        android:id="@+id/action_help"
+        android:icon="@android:drawable/ic_menu_help"
+        android:onClick="onHelp"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_help">
     </item>
     <item
         android:id="@+id/menu_active_hazards"

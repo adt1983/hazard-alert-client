@@ -1,25 +1,22 @@
-package com.hazardalert;
-
-import java.util.Calendar;
+package com.hazardalert.activity;
 
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.DatePicker;
 
-import com.google.analytics.tracking.android.EasyTracker;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.hazardalert.activity.Filter;
-import com.hazardalert.common.AlertFilter;
+import com.hazardalert.BaseMapFragment;
+import com.hazardalert.C;
+import com.hazardalert.DataManagerFragment;
+import com.hazardalert.HazardListFragment;
+import com.hazardalert.Log;
+import com.hazardalert.R;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends HazardAlertFragmentActivity {
 	private static final String KEY_VISIBLE_FRAGMENT_TAG = "KEY_VISIBLE_FRAGMENT_TAG";
 
 	private DataManagerFragment dataFragment;
@@ -29,10 +26,6 @@ public class MainActivity extends FragmentActivity {
 	private HazardListFragment listFragment;
 
 	private Fragment visibleFragment = null;
-
-	private int mYear, mMonth, mDay;
-
-	public static String DATE_PICKER_DIALOG = "datePicker";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -57,20 +50,6 @@ public class MainActivity extends FragmentActivity {
 		else {
 			throw new RuntimeException();
 		}
-	}
-
-	@Override
-	public void onStart() {
-		super.onStart();
-		Log.v();
-		EasyTracker.getInstance(this).activityStart(this);
-	}
-
-	@Override
-	public void onStop() {
-		super.onStop();
-		Log.v();
-		EasyTracker.getInstance(this).activityStop(this);
 	}
 
 	@Override
@@ -182,49 +161,12 @@ public class MainActivity extends FragmentActivity {
 		return true;
 	}
 
-	public void onLegalNotices(MenuItem munuItem) {
-		showDialog(2); //TODO working on to replace this deprecated method
-	}
-
-	public void filterByEffectiveDate(MenuItem menuItem) {
-		final Calendar calendar = Calendar.getInstance();
-		mYear = calendar.get(Calendar.YEAR);
-		mMonth = calendar.get(Calendar.MONTH);
-		mDay = calendar.get(Calendar.DAY_OF_MONTH);
-		showDialog(1); //TODO working on to replace this deprecated method
-	}
-
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		switch (id) {
-		case 1:
-			return new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-				@Override
-				public void onDateSet(DatePicker view, int selectedYear, int selectedMonth, int selectedDay) {
-					Calendar cal = Calendar.getInstance();
-					cal.set(selectedYear, selectedMonth, selectedDay);
-					if (visibleFragment == mapFragment) {
-						AlertFilter filter = mapFragment.getDataManager().getFilter();
-						filter.setMinEffective(cal.getTimeInMillis());
-						mapFragment.getDataManager().setFilter(filter);
-					}
-					else if (visibleFragment == listFragment) {
-						AlertFilter filter = listFragment.getDataManager().getFilter();
-						filter.setMinEffective(cal.getTimeInMillis());
-						listFragment.getDataManager().setFilter(filter);
-					}
-					else {
-						throw new RuntimeException();
-					}
-				}
-			}, mYear, mMonth, mDay);
-		case 2:
-			String LicenseInfo = GooglePlayServicesUtil.getOpenSourceSoftwareLicenseInfo(getApplicationContext());
-			AlertDialog.Builder LicenseDialog = new AlertDialog.Builder(MainActivity.this);
-			LicenseDialog.setTitle("Legal Notices");
-			LicenseDialog.setMessage(LicenseInfo);
-			LicenseDialog.show();
-		}
-		return null;
+	public boolean onLegalNotices(MenuItem munuItem) {
+		String licenseInfo = GooglePlayServicesUtil.getOpenSourceSoftwareLicenseInfo(getApplicationContext());
+		AlertDialog.Builder licenseDialog = new AlertDialog.Builder(this);
+		licenseDialog.setTitle("Legal Notices");
+		licenseDialog.setMessage(licenseInfo);
+		licenseDialog.show();
+		return true;
 	}
 }

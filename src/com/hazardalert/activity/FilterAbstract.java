@@ -3,11 +3,10 @@ package com.hazardalert.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 
 import com.hazardalert.common.AlertFilter;
 
-public abstract class FilterAbstract extends FragmentActivity {
+public abstract class FilterAbstract extends HazardAlertFragmentActivity {
 	private final static String KEY_FILTER = "KEY_FILTER";
 
 	protected AlertFilter filter;

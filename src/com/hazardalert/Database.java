@@ -200,16 +200,18 @@ public class Database {
 
 	public void updateHazard(Hazard h) {
 		ContentValues values = toContentValues(h);
-		if (1 != db.update(HazardTable.TABLE_HAZARD, values, HazardTable.COLUMN_ID + " = ?", new String[] { Long.toString(h.db_id) })) {
-			throw new RuntimeException();
+		int r = db.update(HazardTable.TABLE_HAZARD, values, HazardTable.COLUMN_ID + " = ?", new String[] { Long.toString(h.db_id) });
+		if (1 != r) {
+			throw new RuntimeException(h.toString() + ", r == " + r);
 		}
 	}
 
 	public void deleteHazard(Hazard h) {
 		Log.d("Deleting " + h.toString());
 		h.onDelete(appContext);
-		if (1 != db.delete(HazardTable.TABLE_HAZARD, HazardTable.COLUMN_ID + " = ?", new String[] { Long.toString(h.db_id) })) {
-			throw new RuntimeException();
+		int r = db.delete(HazardTable.TABLE_HAZARD, HazardTable.COLUMN_ID + " = ?", new String[] { Long.toString(h.db_id) });
+		if (1 != r) {
+			throw new RuntimeException(h.toString() + ", r == " + r);
 		}
 		try {
 			SupercededBy.remove(appContext, h.getFullName());

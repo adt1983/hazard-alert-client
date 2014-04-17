@@ -10,7 +10,7 @@
     <!-- "14 is the new 8." - Mark Murphy 2013.10.16 -->
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="18" />
+        android:targetSdkVersion="19" />
 
     <permission
         android:name="com.hazardalert.permission.C2D_MESSAGE"
@@ -77,7 +77,7 @@
 
         <!-- Not sure about configChanges: http://stackoverflow.com/questions/7818717/why-not-use-always-androidconfigchanges-keyboardhiddenorientation -->
         <activity
-            android:name=".MainActivity"
+            android:name="com.hazardalert.activity.MainActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name" >
             <intent-filter>
@@ -88,8 +88,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".HazardDetail"
-            android:parentActivityName=".MainActivity" >
+            android:name="com.hazardalert.activity.HazardDetail"
+            android:parentActivityName="com.hazardalert.activity.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
@@ -97,7 +97,7 @@
         <activity
             android:name=".activity.Filter"
             android:label="Filter Your Search"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName="com.hazardalert.activity.MainActivity" >
         </activity>
         <activity
             android:name=".activity.SenderFilter"
@@ -110,13 +110,14 @@
             android:parentActivityName=".activity.LanguageFilter" >
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.hazardalert.activity.SettingsActivity"
             android:label="Notification Settings"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName="com.hazardalert.activity.MainActivity" >
         </activity>
         <activity
-            android:name=".ActiveHazardActivity"
-            android:parentActivityName=".MainActivity" >
+            android:name="com.hazardalert.activity.ActiveHazardActivity"
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName="com.hazardalert.activity.MainActivity" >
         </activity>
         <activity
             android:name=".activity.SenderSettings"

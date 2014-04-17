@@ -7,8 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.appspot.hazard_alert.alertendpoint.model.AlertTransport;
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.MapBuilder;
+import com.google.analytics.tracking.android.Tracker;
 import com.google.android.gcm.GCMBaseIntentService;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.hazardalert.common.Assert;
 
 /**
  * IntentService responsible for handling GCM messages.
@@ -74,6 +78,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 				alert = new AlertAPI().alertFind(intent.getStringExtra("fullName"));
 				Database db = Database.getInstance(context);
 				db.insertAlert(context, alert);
+				trackDeliveryTiming(context, intent);
 				db.deleteExpired();
 				return;
 			}
@@ -93,6 +98,28 @@ public class GCMIntentService extends GCMBaseIntentService {
 					HazardAlert.logException(context, e1);
 				}
 			}
+		}
+	}
+
+	private void trackDeliveryTiming(Context ctx, Intent intent) {
+		try {
+			Tracker easyTracker = EasyTracker.getInstance(this);
+			String timeSentString = intent.getStringExtra("timeSent");
+			new Assert(null != timeSentString);
+			long timeSent = Long.parseLong(timeSentString);
+			new Assert(0 != timeSent);
+			new Assert(timeSent > 0);
+			long timeNow = new Date().getTime(); // get the time from the server to compensate for skew?
+			new Assert(timeNow > timeSent);
+			easyTracker.send(MapBuilder.createTiming("gcm", // Timing category (required)
+														timeNow - timeSent, // Timing interval in milliseconds (required)
+														"pushAlert", // Timing name
+														"label") // Timing label
+										.build());
+			Log.v("" + (timeNow - timeSent));
+		}
+		catch (Exception e) {
+			HazardAlert.logException(ctx, e);
 		}
 	}
 

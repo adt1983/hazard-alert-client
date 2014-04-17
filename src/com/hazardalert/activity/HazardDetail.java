@@ -1,4 +1,4 @@
-package com.hazardalert;
+package com.hazardalert.activity;
 
 import java.util.List;
 import java.util.Map;
@@ -10,14 +10,12 @@ import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.util.Linkify;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
 import com.google.analytics.tracking.android.EasyTracker;
@@ -28,10 +26,14 @@ import com.google.publicalerts.cap.Info;
 import com.google.publicalerts.cap.Info.Certainty;
 import com.google.publicalerts.cap.Info.Severity;
 import com.google.publicalerts.cap.Info.Urgency;
+import com.hazardalert.Database;
+import com.hazardalert.Hazard;
+import com.hazardalert.Log;
+import com.hazardalert.R;
 import com.hazardalert.common.Assert;
 import com.hazardalert.common.CommonUtil;
 
-public class HazardDetail extends FragmentActivity {
+public class HazardDetail extends HazardAlertFragmentActivity {
 	private Hazard h = null;
 
 	private Alert alert = null;
@@ -40,10 +42,18 @@ public class HazardDetail extends FragmentActivity {
 
 	private Area area = null;
 
-	public static void start(Context ctx, Hazard h) {
+	// http://stackoverflow.com/questions/18153730/in-activity-oncreate-why-does-intent-getextras-sometimes-return-null
+	private static final String ID_EXTRA = "com.hazardalert.HazardDetail.id";
+
+	public static void startActivity(Context ctx, Hazard h) {
+		ctx.startActivity(buildIntent(ctx, h));
+	}
+
+	public static Intent buildIntent(Context ctx, Hazard h) {
 		Intent intent = new Intent(ctx, HazardDetail.class);
-		intent.putExtra("id", h.getId());
-		ctx.startActivity(intent);
+		intent.putExtra(ID_EXTRA, h.getId());
+		new Assert(null != intent.getStringExtra(ID_EXTRA));
+		return intent;
 	}
 
 	@Override
@@ -51,7 +61,7 @@ public class HazardDetail extends FragmentActivity {
 		Log.d();
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.hazard_detail);
-		String id = getIntent().getStringExtra("id");
+		String id = getIntent().getStringExtra(ID_EXTRA);
 		new Assert(null != id);
 		Database db = Database.getInstance(this);
 		h = db.safeGetByHazardId(id);
@@ -163,34 +173,11 @@ public class HazardDetail extends FragmentActivity {
 		}
 	}
 
-	private ShareActionProvider mShareActionProvider;
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		Log.d();
 		getMenuInflater().inflate(R.menu.activity_hazard_detail, menu);
-		return true;/*
-					new Assert(null != h);
-					// Inflate menu resource file.
-					getMenuInflater().inflate(R.menu.activity_hazard_detail, menu);
-					// Locate MenuItem with ShareActionProvider
-					MenuItem item = menu.findItem(R.id.menu_item_share);
-					// Fetch and store ShareActionProvider
-					mShareActionProvider = (ShareActionProvider) item.getActionProvider();
-					Intent shareIntent;
-					String hazardLink = h.getInfo().hasWeb() ? h.getInfo().getWeb() : h.getSourceUrl();
-					String html = "<a href=\"" + hazardLink + "\">" + h.getInfo().getEvent()
-					+ "</a> via <a href=\"https://play.google.com/store/apps/details?id=com.hazardalert\">Hazard Alert</a>";
-					if (h.getInfo().hasWeb()) {
-					shareIntent = ShareCompat.IntentBuilder.from(this).setType("text/html").setHtmlText(html).getIntent();
-					//shareIntent = ShareCompat.IntentBuilder.from(this).setType("text/html").setText(h.getInfo().getWeb() + link).getIntent();
-					}
-					else {
-					shareIntent = ShareCompat.IntentBuilder.from(this).setType("text/html").setHtmlText(html).getIntent();
-					//shareIntent = ShareCompat.IntentBuilder.from(this).setType("text/html").setText(h.getSourceUrl() + link).getIntent();
-					}
-					mShareActionProvider.setShareIntent(shareIntent);
-					return super.onCreateOptionsMenu(menu);*/
+		return true;
 	}
 
 	public boolean onShare(MenuItem menuItem) {
@@ -236,6 +223,7 @@ public class HazardDetail extends FragmentActivity {
 		startActivity(chooser);
 		// track
 		EasyTracker easyTracker = EasyTracker.getInstance(this);
+		//WISHLIST Would be nice to see the channel (FB/Twitter/etc) but requires a custom chooser?
 		easyTracker.send(MapBuilder.createEvent("ui_action", // Event category (required)
 												"button_press", // Event action (required)
 												"share_button", // Event label
@@ -248,17 +236,5 @@ public class HazardDetail extends FragmentActivity {
 		if (!map.containsKey(packageName)) {
 			map.put(packageName, intent);
 		}
-	}
-
-	@Override
-	public void onStart() {
-		super.onStart();
-		EasyTracker.getInstance(this).activityStart(this);
-	}
-
-	@Override
-	public void onStop() {
-		super.onStop();
-		EasyTracker.getInstance(this).activityStop(this);
 	}
 }
