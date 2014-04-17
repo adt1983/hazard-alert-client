@@ -6,7 +6,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.ListAdapter;
 
-import com.google.analytics.tracking.android.EasyTracker;
 import com.hazardalert.R;
 import com.hazardalert.Sender;
 import com.hazardalert.common.AlertFilter;
@@ -50,17 +49,5 @@ public class SenderFilter extends FilterAbstract {
 		fragment = SenderFilterListFragment.newInstance(filter);
 		ft.replace(R.id.sender_filter_fragment_container, fragment);
 		ft.commit();
-	}
-
-	@Override
-	public void onStart() {
-		super.onStart();
-		EasyTracker.getInstance(this).activityStart(this);
-	}
-
-	@Override
-	public void onStop() {
-		super.onStop();
-		EasyTracker.getInstance(this).activityStop(this);
 	}
 }

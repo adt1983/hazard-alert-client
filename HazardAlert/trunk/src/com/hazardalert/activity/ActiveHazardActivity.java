@@ -1,17 +1,19 @@
-package com.hazardalert;
+package com.hazardalert.activity;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 
-import com.google.analytics.tracking.android.EasyTracker;
+import com.hazardalert.ActiveHazardFragment;
+import com.hazardalert.DataManagerFragment;
+import com.hazardalert.Log;
 
-public class ActiveHazardActivity extends FragmentActivity {
+public class ActiveHazardActivity extends HazardAlertFragmentActivity {
 	private DataManagerFragment dataFragment = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.v();
 		// Display the fragment as the main content.
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 		dataFragment = (DataManagerFragment) getSupportFragmentManager().findFragmentByTag(DataManagerFragment.TAG);
@@ -23,17 +25,5 @@ public class ActiveHazardActivity extends FragmentActivity {
 		ahf.setDataManager(dataFragment);
 		ft.replace(android.R.id.content, ahf);
 		ft.commit();
-	}
-
-	@Override
-	public void onStart() {
-		super.onStart();
-		EasyTracker.getInstance(this).activityStart(this);
-	}
-
-	@Override
-	public void onStop() {
-		super.onStop();
-		EasyTracker.getInstance(this).activityStop(this);
 	}
 }

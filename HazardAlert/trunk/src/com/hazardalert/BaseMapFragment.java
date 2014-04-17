@@ -42,6 +42,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
+import com.hazardalert.activity.HazardDetail;
 import com.hazardalert.common.AlertFilter;
 import com.hazardalert.common.Assert;
 import com.hazardalert.common.Point;
@@ -301,6 +302,15 @@ public class BaseMapFragment extends SupportMapFragment implements DataManager.S
 				visibleBounds = new Bounds(map.getProjection().getVisibleRegion().latLngBounds); // can't access map from off UI thread
 				AlertFilter filter = getDataManager().getFilter();
 				filter.setInclude(visibleBounds);
+				/* frequent updates can cause problems with async loaders - fixed by adding synchronized to DM.reload?
+				   http://code.google.com/p/gmaps-api-issues/issues/detail?id=4636
+				
+				   java.lang.IllegalStateException: Called while creating a loader
+					at android.support.v4.app.LoaderManagerImpl.restartLoader(LoaderManager.java:591)
+					at com.hazardalert.DataManagerFragment.reload(DataManagerFragment.java:131)
+					at com.hazardalert.DataManagerFragment.setFilter(DataManagerFragment.java:111)
+					at com.hazardalert.BaseMapFragment$1.onCameraChange(BaseMapFragment.java:304
+				 */
 				getDataManager().setFilter(filter);
 				new SubscriptionManager().execute();
 				if (null != loadSpinner) {
@@ -326,7 +336,7 @@ public class BaseMapFragment extends SupportMapFragment implements DataManager.S
 			@Override
 			public void onInfoWindowClick(Marker marker) {
 				HazardItem hi = markerToItem.get(marker.getId());
-				HazardDetail.start(getActivity(), hi.h);
+				HazardDetail.startActivity(getActivity(), hi.h);
 			}
 		});
 		map.setOnMapClickListener(new OnMapClickListener() {

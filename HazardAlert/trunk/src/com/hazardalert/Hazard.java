@@ -20,6 +20,7 @@ import com.google.publicalerts.cap.Info;
 import com.google.publicalerts.cap.Info.Certainty;
 import com.google.publicalerts.cap.Info.Severity;
 import com.google.publicalerts.cap.Info.Urgency;
+import com.hazardalert.activity.HazardDetail;
 import com.hazardalert.common.Assert;
 import com.hazardalert.common.Bounds;
 import com.hazardalert.common.CommonUtil;
@@ -272,8 +273,7 @@ public class Hazard {
 		if (exceedsThreshold(Urgency.FUTURE, Severity.MODERATE, Certainty.POSSIBLE) && allowNotifSound) {
 			builder.setDefaults(Notification.DEFAULT_SOUND);
 		}
-		Intent resultIntent = new Intent(ctx, HazardDetail.class);
-		resultIntent.putExtra("id", getId());
+		Intent resultIntent = HazardDetail.buildIntent(ctx, this);
 		resultIntent.setData(new Uri.Builder().scheme("data").appendQueryParameter("unique", getId()).build()); // http://stackoverflow.com/questions/12968280/android-multiple-notifications-and-with-multiple-intents
 		TaskStackBuilder stackBuilder = TaskStackBuilder.create(ctx);
 		stackBuilder.addParentStack(HazardDetail.class);

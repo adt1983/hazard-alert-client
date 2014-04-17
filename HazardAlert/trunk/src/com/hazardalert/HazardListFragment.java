@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.hazardalert.activity.HazardDetail;
 import com.hazardalert.common.Assert;
 
 public class HazardListFragment extends ListFragment implements DataManager.Subscriber {
@@ -38,7 +39,7 @@ public class HazardListFragment extends ListFragment implements DataManager.Subs
 				@Override
 				public void onClick(View v) {
 					Log.v();
-					HazardDetail.start(getContext(), h);
+					HazardDetail.startActivity(getContext(), h);
 				}
 			};
 			row.setOnClickListener(listener);
