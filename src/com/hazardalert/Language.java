@@ -96,7 +96,7 @@ public class Language {
 	}
 
 	public Locale getLocale() {
-		new Assert(language.length() == 5);
+		new Assert(language.length() == 5, language); // TODO: RFC 3066 compliant? Check on server?
 		new Assert('-' == language.charAt(2));
 		Locale locale = new Locale(language.substring(0, 2), language.substring(3, 5));
 		return locale;

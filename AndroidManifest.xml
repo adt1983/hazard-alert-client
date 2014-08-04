@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hazardalert"
-    android:versionCode="19"
-    android:versionName="2014.04.17" >
+    android:versionCode="20"
+    android:versionName="2014.08.03" >
 
     <!-- Need SDK 8+ for GCM -->
     <!-- Need SDK 9+ for Strict Mode -->
@@ -74,6 +74,15 @@
         <service android:name="com.hazardalert.OnLocationRefresh" />
         <service android:name="com.hazardalert.OnStart" />
         <service android:name="com.hazardalert.OnUpdateSubscription" />
+
+        <!-- AdMob -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <activity
+            android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
 
         <!-- Not sure about configChanges: http://stackoverflow.com/questions/7818717/why-not-use-always-androidconfigchanges-keyboardhiddenorientation -->
         <activity

@@ -1,170 +1,188 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/Black" >
+    android:orientation="vertical" >
 
-    <LinearLayout
+    <com.google.android.gms.ads.AdView
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
         android:layout_width="fill_parent"
-        android:layout_height="352dp"
-        android:orientation="vertical"
-        android:padding="5sp" >
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        ads:adSize="BANNER"
+        ads:adUnitId="ca-app-pub-9522356965206611/3320407082"
+        android:background="@color/Black" />
+
+    <ScrollView
+        android:id="@+id/scrollview"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/adView"
+        android:background="@color/Black" >
+
+        <!-- 352dp -->
 
         <LinearLayout
-            android:id="@+id/alert_test_scope"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="@color/Red"
-            android:orientation="horizontal"
-            android:visibility="gone" >
+            android:orientation="vertical"
+            android:padding="5sp" >
+
+            <LinearLayout
+                android:id="@+id/alert_test_scope"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/Red"
+                android:orientation="horizontal"
+                android:visibility="gone" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="*** TEST *** TEST *** TEST ***"
+                    android:textAlignment="center"
+                    android:textColor="@color/Black" >
+                </TextView>
+            </LinearLayout>
 
             <TextView
+                android:id="@+id/alert_desc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="*** TEST *** TEST *** TEST ***"
-                android:textAlignment="center"
-                android:textColor="@color/Black" >
+                android:autoLink="all"
+                android:textColor="@color/White" />
+
+            <TextView
+                android:id="@+id/alert_instruction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:autoLink="all"
+                android:textColor="@color/White"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/alert_web"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:autoLink="web"
+                android:textColor="@color/White"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/alert_contact"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:autoLink="all"
+                android:gravity="bottom"
+                android:textColor="@color/White"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/alert_event"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/White" />
+
+            <TextView
+                android:id="@+id/alert_sender"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/White" />
+
+            <TextView
+                android:id="@+id/alert_senderName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/White"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:id="@+id/alert_urgency_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Urgency: "
+                    android:textColor="@color/White" />
+
+                <TextView
+                    android:id="@+id/alert_urgency"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/White" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:id="@+id/alert_severity_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Severity: "
+                    android:textColor="@color/White" />
+
+                <TextView
+                    android:id="@+id/alert_severity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/White" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:id="@+id/alert_certainty_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Certainty: "
+                    android:textColor="@color/White" />
+
+                <TextView
+                    android:id="@+id/alert_certainty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/White" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/alert_effective"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/White" >
             </TextView>
+
+            <TextView
+                android:id="@+id/alert_expires"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/White" >
+            </TextView>
+
+            <TextView
+                android:id="@+id/alert_areadesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/White" />
+
+            <TextView
+                android:id="@+id/alert_sourceUrl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:autoLink="all"
+                android:textColor="@color/White" />
+            <!-- TODO: MapFragment - kept getting 'IllegalArgumentException: Binary XML file Duplicate id, tag null, or parent id with another fragment' since SupportMapFragment is already instantiated in MainActivity. hmmmm. -->
         </LinearLayout>
+    </ScrollView>
 
-        <TextView
-            android:id="@+id/alert_desc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:autoLink="all"
-            android:textColor="@color/White" />
-
-        <TextView
-            android:id="@+id/alert_instruction"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:autoLink="all"
-            android:textColor="@color/White"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/alert_web"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:autoLink="web"
-            android:textColor="@color/White"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/alert_contact"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:autoLink="all"
-            android:gravity="bottom"
-            android:textColor="@color/White"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/alert_event"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/White" />
-
-        <TextView
-            android:id="@+id/alert_sender"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/White" />
-
-        <TextView
-            android:id="@+id/alert_senderName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/White"
-            android:visibility="gone" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-
-            <TextView
-                android:id="@+id/alert_urgency_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Urgency: "
-                android:textColor="@color/White" />
-
-            <TextView
-                android:id="@+id/alert_urgency"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/White" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-
-            <TextView
-                android:id="@+id/alert_severity_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Severity: "
-                android:textColor="@color/White" />
-
-            <TextView
-                android:id="@+id/alert_severity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/White" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-
-            <TextView
-                android:id="@+id/alert_certainty_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Certainty: "
-                android:textColor="@color/White" />
-
-            <TextView
-                android:id="@+id/alert_certainty"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/White" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/alert_effective"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/White" >
-        </TextView>
-
-        <TextView
-            android:id="@+id/alert_expires"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/White" >
-        </TextView>
-
-        <TextView
-            android:id="@+id/alert_areadesc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/White" />
-
-        <TextView
-            android:id="@+id/alert_sourceUrl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:autoLink="all"
-            android:textColor="@color/White" />
-
-        <!-- TODO: MapFragment - kept getting 'IllegalArgumentException: Binary XML file Duplicate id, tag null, or parent id with another fragment' since SupportMapFragment is already instantiated in MainActivity. hmmmm. -->
-
-    </LinearLayout>
-
-</ScrollView>
+</RelativeLayout>

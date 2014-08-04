@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 
 import android.content.ContentValues;
@@ -107,8 +108,9 @@ public class Database {
 		try {
 			db.beginTransaction();
 			// most recent alerts first
-			for (AlertTransport at : com.google.common.collect.Lists.reverse(alerts)) {
-				insertAlert(context, at);
+			ListIterator<AlertTransport> li = alerts.listIterator(alerts.size());
+			while (li.hasPrevious()) {
+				insertAlert(context, li.previous());
 			}
 			db.setTransactionSuccessful();
 		}

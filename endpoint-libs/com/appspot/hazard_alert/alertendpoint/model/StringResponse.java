@@ -19,7 +19,7 @@
 package com.appspot.hazard_alert.alertendpoint.model;
 
 /**
- * Model definition for AlertTransportCollection.
+ * Model definition for StringResponse.
  *
  * <p> This is the Java data model class that specifies how to parse/serialize into the JSON that is
  * transmitted over HTTP when working with the alertendpoint. For a detailed explanation see:
@@ -29,43 +29,37 @@ package com.appspot.hazard_alert.alertendpoint.model;
  * @author Google, Inc.
  */
 @SuppressWarnings("javadoc")
-public final class AlertTransportCollection extends com.google.api.client.json.GenericJson {
+public final class StringResponse extends com.google.api.client.json.GenericJson {
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.util.List<AlertTransport> items;
-
-  static {
-    // hack to force ProGuard to consider AlertTransport used, since otherwise it would be stripped out
-    // see http://code.google.com/p/google-api-java-client/issues/detail?id=528
-    com.google.api.client.util.Data.nullOf(AlertTransport.class);
-  }
+  private java.lang.String value;
 
   /**
    * @return value or {@code null} for none
    */
-  public java.util.List<AlertTransport> getItems() {
-    return items;
+  public java.lang.String getValue() {
+    return value;
   }
 
   /**
-   * @param items items or {@code null} for none
+   * @param value value or {@code null} for none
    */
-  public AlertTransportCollection setItems(java.util.List<AlertTransport> items) {
-    this.items = items;
+  public StringResponse setValue(java.lang.String value) {
+    this.value = value;
     return this;
   }
 
   @Override
-  public AlertTransportCollection set(String fieldName, Object value) {
-    return (AlertTransportCollection) super.set(fieldName, value);
+  public StringResponse set(String fieldName, Object value) {
+    return (StringResponse) super.set(fieldName, value);
   }
 
   @Override
-  public AlertTransportCollection clone() {
-    return (AlertTransportCollection) super.clone();
+  public StringResponse clone() {
+    return (StringResponse) super.clone();
   }
 
 }
