@@ -20,6 +20,8 @@ import android.widget.TextView;
 
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.MapBuilder;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.publicalerts.cap.Alert;
 import com.google.publicalerts.cap.Area;
 import com.google.publicalerts.cap.Info;
@@ -30,6 +32,7 @@ import com.hazardalert.Database;
 import com.hazardalert.Hazard;
 import com.hazardalert.Log;
 import com.hazardalert.R;
+import com.hazardalert.U;
 import com.hazardalert.common.Assert;
 import com.hazardalert.common.CommonUtil;
 
@@ -70,6 +73,28 @@ public class HazardDetail extends HazardAlertFragmentActivity {
 		info = h.getInfo();
 		area = h.getArea();
 		this.setContentView(R.layout.hazard_detail);
+		// Look up the AdView as a resource and load a request.
+		AdView adView = (AdView) this.findViewById(R.id.adView);
+		//AdRequest adRequest = new AdRequest.Builder().addTestDevice("181E681670510D8753AEF9ACE8CFC544").build();
+		AdRequest.Builder arb = new AdRequest.Builder();
+		try {
+			String contentUrl = h.getSourceUrl();
+			if (info.hasWeb()) {
+				contentUrl = info.getWeb();
+			}
+			arb.setContentUrl(contentUrl);
+		}
+		catch (Exception e) {
+			// do nothing
+		}
+		try {
+			arb.setLocation(U.getLastKnownLocation(this));
+		}
+		catch (Exception e) {
+			// do nothing
+		}
+		adView.loadAd(arb.build());
+		//
 		if (Alert.Scope.PUBLIC != alert.getScope() || Alert.Status.ACTUAL != alert.getStatus()) {
 			((LinearLayout) this.findViewById(R.id.alert_test_scope)).setVisibility(View.VISIBLE);
 		}

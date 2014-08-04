@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import org.acra.ACRA;
+
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.PendingIntent;
@@ -111,6 +113,8 @@ public class OnUpdateSubscription extends IntentService {
 		}
 		catch (IOException e) {
 			Log.e("Unable to create/update subscription.", e);
+			//TODO seeing too many hits to server - whats going on?
+			ACRA.getErrorReporter().handleSilentException(e);
 			throw new RuntimeException();
 		}
 	}

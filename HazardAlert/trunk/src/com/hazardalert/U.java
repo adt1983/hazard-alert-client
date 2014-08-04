@@ -35,18 +35,23 @@ public final class U extends CommonUtil {
 				&& HazardAlert.containsPreference(ctx.getApplicationContext(), C.SP_LAST_LNG);
 	}
 
-	public static Point getLastLocation(Context ctx) {
-		if (null != lastLocation) {
-			Log.d("Lng: " + lastLocation.getLng() + " Lat: " + lastLocation.getLat() + " Source: Cache");
-			return lastLocation;
-		}
+	public static Location getLastKnownLocation(Context ctx) {
 		LocationManager lm = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
 		Criteria criteria = new Criteria();
 		criteria.setCostAllowed(false);
 		String provider = lm.getBestProvider(criteria, true);
 		Location loc = null == provider ? null : lm.getLastKnownLocation(provider);
+		return loc;
+	}
+
+	public static Point getLastLocation(Context ctx) {
+		if (null != lastLocation) {
+			Log.d("Lng: " + lastLocation.getLng() + " Lat: " + lastLocation.getLat() + " Source: Cache");
+			return lastLocation;
+		}
+		Location loc = getLastKnownLocation(ctx);
 		if (null != loc) {
-			Log.d("Lng: " + loc.getLongitude() + " Lat: " + loc.getLatitude() + " Source: LocationManager Provider: " + provider);
+			Log.d("Lng: " + loc.getLongitude() + " Lat: " + loc.getLatitude() + " Source: LocationManager Provider: " + loc.getProvider());
 			lastLocation = U.toPoint(loc);
 			return lastLocation;
 		}

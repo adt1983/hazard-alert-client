@@ -109,8 +109,9 @@ public class GCMIntentService extends GCMBaseIntentService {
 			long timeSent = Long.parseLong(timeSentString);
 			new Assert(0 != timeSent);
 			new Assert(timeSent > 0);
-			long timeNow = new Date().getTime(); // get the time from the server to compensate for skew?
-			new Assert(timeNow > timeSent);
+			//long timeNow = new AlertAPI().serverTime();
+			long timeNow = new Date().getTime();
+			new Assert(timeNow > timeSent); // TODO: need to use server time to eliminate clock skew
 			easyTracker.send(MapBuilder.createTiming("gcm", // Timing category (required)
 														timeNow - timeSent, // Timing interval in milliseconds (required)
 														"pushAlert", // Timing name
