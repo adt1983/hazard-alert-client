@@ -96,10 +96,15 @@ public class Language {
 	}
 
 	public Locale getLocale() {
-		new Assert(language.length() == 5, language); // TODO: RFC 3066 compliant? Check on server?
-		new Assert('-' == language.charAt(2));
-		Locale locale = new Locale(language.substring(0, 2), language.substring(3, 5));
-		return locale;
+		if (5 == language.length() && '-' == language.charAt(2)) {
+			return new Locale(language.substring(0, 2), language.substring(3, 5)); // TODO: RFC 3066 compliant? Check on server?
+		}
+		if ('-' == language.charAt(2)) {
+			return new Locale(language.substring(0, 2), language.substring(3, language.length())); // allow for variants such as 'es-419'
+		}
+		else {
+			return new Locale(language); // everything else?
+		}
 	}
 
 	public String getDisplayLanguage() {

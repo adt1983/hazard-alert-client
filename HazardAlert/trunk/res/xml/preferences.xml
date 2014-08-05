@@ -13,6 +13,47 @@
         android:title="@string/pref_notif_sound_allow" />
 
     <PreferenceScreen
+        android:dependency="pref_notif_sound_allow"
+        android:key="@+id/pref_notif_sounds"
+        android:summary="Customize sounds for different alerts"
+        android:title="Notification Sounds" >
+        <RingtonePreference
+            android:defaultValue="content://settings/system/alarm_alert"
+            android:key="pref_notif_sound_extreme"
+            android:ringtoneType="notification|alarm"
+            android:showDefault="true"
+            android:title="Severity: Extreme" >
+        </RingtonePreference>
+        <RingtonePreference
+            android:defaultValue="content://settings/system/notification_sound"
+            android:key="pref_notif_sound_severe"
+            android:ringtoneType="notification|alarm"
+            android:showDefault="true"
+            android:title="Severity: Severe" >
+        </RingtonePreference>
+        <RingtonePreference
+            android:defaultValue="content://settings/system/notification_sound"
+            android:key="pref_notif_sound_moderate"
+            android:ringtoneType="notification|alarm"
+            android:showDefault="true"
+            android:title="Severity: Moderate" >
+        </RingtonePreference>
+        <RingtonePreference
+            android:defaultValue=""
+            android:key="pref_notif_sound_minor"
+            android:ringtoneType="notification|alarm"
+            android:showDefault="true"
+            android:title="Severity: Minor" >
+        </RingtonePreference>
+        <RingtonePreference
+            android:defaultValue=""
+            android:key="pref_notif_sound_unknown"
+            android:ringtoneType="notification|alarm"
+            android:showDefault="true"
+            android:title="Severity: Unknown" >
+        </RingtonePreference>
+    </PreferenceScreen>
+    <PreferenceScreen
         android:key="@+id/pref_sender_filter"
         android:summary="Ignore alerts from specific senders"
         android:title="Allowed Senders" >
