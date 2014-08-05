@@ -23,6 +23,16 @@ public class C {
 
 	public static final String PREF_NOTIF_SOUND_ALLOW = "pref_notif_sound_allow";
 
+	public static final String PREF_NOTIF_SOUND_EXTREME = "pref_notif_sound_extreme";
+
+	public static final String PREF_NOTIF_SOUND_SEVERE = "pref_notif_sound_severe";
+
+	public static final String PREF_NOTIF_SOUND_MODERATE = "pref_notif_sound_moderate";
+
+	public static final String PREF_NOTIF_SOUND_MINOR = "pref_notif_sound_minor";
+
+	public static final String PREF_NOTIF_SOUND_UNKNOWN = "pref_notif_sound_unknown";
+
 	public static final String SP_SUPPRESSED_SENDERS = "SP_SUPPRESSED_SENDERS";
 
 	public static final String SP_LAST_LAT = "SP_LAST_LAT";

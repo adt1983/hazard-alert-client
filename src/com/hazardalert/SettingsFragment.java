@@ -1,16 +1,28 @@
 package com.hazardalert;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.PreferenceFragment;
+import android.preference.RingtonePreference;
 
 public class SettingsFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.preferences);
+		updateRingtoneSummaries();
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		updateRingtoneSummaries(); // http://stackoverflow.com/questions/6725105/ringtonepreference-not-firing-onsharedpreferencechanged
 	}
 
 	@Override
@@ -33,5 +45,22 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 	public void onPause() {
 		getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
 		super.onPause();
+	}
+
+	private final String sounds[] = { C.PREF_NOTIF_SOUND_EXTREME, C.PREF_NOTIF_SOUND_SEVERE, C.PREF_NOTIF_SOUND_MODERATE,
+			C.PREF_NOTIF_SOUND_MINOR, C.PREF_NOTIF_SOUND_UNKNOWN };
+
+	private void updateRingtoneSummaries() {
+		for (int i = 0; i < sounds.length; i++) {
+			RingtonePreference rtp = (RingtonePreference) findPreference(sounds[i]);
+			String uri = HazardAlert.getPreference(getActivity(), sounds[i], "");
+			rtp.setSummary(uri == "" ? "None" : parseRingtone(uri));
+		}
+	}
+
+	private String parseRingtone(String ringtoneUri) {
+		Uri uri = Uri.parse(ringtoneUri);
+		Ringtone ringtone = RingtoneManager.getRingtone(getActivity(), uri);
+		return ringtone.getTitle(getActivity());
 	}
 }

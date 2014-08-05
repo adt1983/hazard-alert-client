@@ -17,7 +17,7 @@ import android.preference.PreferenceManager;
 
 import com.hazardalert.common.Assert;
 
-@ReportsCrashes(formKey = "dEZaUXljeGhMdEU4c01UdThOVmxWRlE6MQ")
+@ReportsCrashes(formUri = "http://www.bugsense.com/api/acra?api_key=97db9a7c", formKey = "")
 public class HazardAlert extends Application {
 	@SuppressLint("NewApi")
 	@Override

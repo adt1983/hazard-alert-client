@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.Date;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -247,6 +246,21 @@ public class Hazard {
 		cancelNotify(ctx);
 	}
 
+	private String getNotificationSound(Context ctx, com.google.publicalerts.cap.Info.Severity severity) {
+		switch (severity.ordinal()) {
+		case Severity.EXTREME_VALUE:
+			return HazardAlert.getPreference(ctx, C.PREF_NOTIF_SOUND_EXTREME, "");
+		case Severity.SEVERE_VALUE:
+			return HazardAlert.getPreference(ctx, C.PREF_NOTIF_SOUND_SEVERE, "");
+		case Severity.MODERATE_VALUE:
+			return HazardAlert.getPreference(ctx, C.PREF_NOTIF_SOUND_MODERATE, "");
+		case Severity.MINOR_VALUE:
+			return HazardAlert.getPreference(ctx, C.PREF_NOTIF_SOUND_MINOR, "");
+		default:
+			return HazardAlert.getPreference(ctx, C.PREF_NOTIF_SOUND_UNKNOWN, "");
+		}
+	}
+
 	public void onEnter(Context ctx) {
 		Log.v("OnHazardEnter: " + getFullName());
 		Database db = Database.getInstance(ctx);
@@ -270,8 +284,11 @@ public class Hazard {
 																				.setContentText("Sev: " + info0.getSeverity() + " Urg: "
 																						+ info0.getUrgency());
 		builder.setPriority(NotificationCompat.PRIORITY_HIGH);
-		if (exceedsThreshold(Urgency.FUTURE, Severity.MODERATE, Certainty.POSSIBLE) && allowNotifSound) {
-			builder.setDefaults(Notification.DEFAULT_SOUND);
+		if (allowNotifSound) {
+			String soundUri = getNotificationSound(ctx, info0.getSeverity());
+			if (!soundUri.isEmpty()) {
+				builder.setSound(Uri.parse(soundUri));
+			}
 		}
 		Intent resultIntent = HazardDetail.buildIntent(ctx, this);
 		resultIntent.setData(new Uri.Builder().scheme("data").appendQueryParameter("unique", getId()).build()); // http://stackoverflow.com/questions/12968280/android-multiple-notifications-and-with-multiple-intents
