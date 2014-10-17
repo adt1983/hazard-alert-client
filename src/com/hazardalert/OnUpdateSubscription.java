@@ -16,6 +16,7 @@ import com.appspot.hazard_alert.alertendpoint.model.AlertTransport;
 import com.appspot.hazard_alert.alertendpoint.model.Subscription;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.hazardalert.common.AlertFilter;
+import com.hazardalert.common.Assert;
 import com.hazardalert.common.Bounds;
 import com.hazardalert.common.Point;
 
@@ -24,11 +25,11 @@ import com.hazardalert.common.Point;
  * and upon establishing a network connection
  */
 public class OnUpdateSubscription extends IntentService {
-	private static final int MAX_ATTEMPTS = 5;
+	private static final int BACKOFF_START_MS = 10000;
 
-	private static final int BACKOFF_MILLI_SECONDS = 10000;
+	private static long backoff = BACKOFF_START_MS;
 
-	private static final String BACKOFF = "backoff";
+	private static boolean running = false;
 
 	private String regId = null;
 
@@ -42,8 +43,13 @@ public class OnUpdateSubscription extends IntentService {
 		Log.v();
 		final Context ctx = getApplicationContext();
 		clearExpiredNotifications();
+		if (!running) {
+			backoff = BACKOFF_START_MS;
+			running = true;
+		}
 		if (!U.isNetworkAvailable(ctx)) {
 			// Log a message if we have been disconnected for "too" long?
+			setupRetry(this);
 			return;
 		}
 		GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(ctx);
@@ -55,33 +61,45 @@ public class OnUpdateSubscription extends IntentService {
 		}
 		catch (IOException e) {
 			Log.e("GCM Registration failed. Retrying...", e);
-			setupRetry(intent);
+			setupRetry(this);
 			return;
 		}
 		if (null == regId) {
 			Log.e("regId: null");
-			setupRetry(intent);
+			setupRetry(this);
 			return;
 		}
 		try {
 			updateSubscription();
+			running = false;
 		}
 		catch (Exception e) {
-			setupRetry(intent);
+			setupRetry(this);
 		}
 	}
 
-	private void setupRetry(Intent intent) {
-		long backoff = intent.getLongExtra(BACKOFF, BACKOFF_MILLI_SECONDS);
+	private static void setupRetry(Context ctx) {
+		Log.d();
+		new Assert(running);
 		backoff *= 2;
-		Intent i = new Intent(this, OnUpdateSubscription.class);
-		i.putExtra(BACKOFF, backoff);
-		PendingIntent pi = PendingIntent.getService(this, 0, i, PendingIntent.FLAG_CANCEL_CURRENT);
-		AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+		Intent i = new Intent(ctx, OnUpdateSubscription.class);
+		PendingIntent pi = PendingIntent.getService(ctx, 0, i, PendingIntent.FLAG_CANCEL_CURRENT);
+		AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
 		am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + backoff, pi);
 	}
 
+	public static void resetBackoff(Context ctx) {
+		Log.d();
+		if (!running)
+			return;
+		backoff = BACKOFF_START_MS;
+		setupRetry(ctx.getApplicationContext());
+	}
+
+	//TODO: Getting called too much from OnConnectiviyChange?
+	//FIXME: Server Subscription count != Install Base - need error checking?
 	private void updateSubscription() {
+		Log.d();
 		final Context ctx = getApplicationContext();
 		AlertAPI alertAPI = new AlertAPI();
 		Point lastLocation = U.getLastLocation(ctx);
