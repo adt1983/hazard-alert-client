@@ -54,13 +54,17 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 		for (int i = 0; i < sounds.length; i++) {
 			RingtonePreference rtp = (RingtonePreference) findPreference(sounds[i]);
 			String uri = HazardAlert.getPreference(getActivity(), sounds[i], "");
-			rtp.setSummary(uri == "" ? "None" : parseRingtone(uri));
+			rtp.setSummary(parseRingtoneTitle(uri));
 		}
 	}
 
-	private String parseRingtone(String ringtoneUri) {
+	private String parseRingtoneTitle(String ringtoneUri) {
+		if (ringtoneUri.equals(""))
+			return "None";
 		Uri uri = Uri.parse(ringtoneUri);
 		Ringtone ringtone = RingtoneManager.getRingtone(getActivity(), uri);
+		if (ringtone == null)
+			return "None";
 		return ringtone.getTitle(getActivity());
 	}
 }
