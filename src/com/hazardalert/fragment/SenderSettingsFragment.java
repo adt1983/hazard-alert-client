@@ -58,6 +58,7 @@ public class SenderSettingsFragment extends ListFragment implements LoaderManage
 			((TextView) row.findViewById(R.id.sender_list_item_name)).setText(s.getName());
 			((TextView) row.findViewById(R.id.sender_list_item_url)).setText(s.getUrl().replace("'", ""));
 			CheckBox allowed = (CheckBox) row.findViewById(R.id.sender_list_allowed);
+			allowed.setOnCheckedChangeListener(null);
 			allowed.setChecked(!s.getSuppress());
 			allowed.setOnCheckedChangeListener(new OnCheckChange(s));
 			return row;

@@ -74,7 +74,7 @@ public class OnStart extends IntentService implements GooglePlayServicesClient.C
 		request.setFastestInterval(50); //50ms
 		request.setSmallestDisplacement((float) 10.0); //10m
 		U.setLastLocation(getApplicationContext(), locationClient.getLastLocation());
-		locationClient.requestLocationUpdates(request, pi);
+		locationClient.requestLocationUpdates(request, pi); //http://stackoverflow.com/questions/24288685/deadobjectexception-in-gmslocationclient-android
 	}
 
 	private void setupSubscriptionUpdates() {

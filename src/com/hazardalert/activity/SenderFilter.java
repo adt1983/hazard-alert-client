@@ -9,6 +9,7 @@ import android.widget.ListAdapter;
 import com.hazardalert.R;
 import com.hazardalert.Sender;
 import com.hazardalert.common.AlertFilter;
+import com.hazardalert.common.Assert;
 import com.hazardalert.fragment.SenderFilterListFragment;
 
 public class SenderFilter extends FilterAbstract {
@@ -20,6 +21,7 @@ public class SenderFilter extends FilterAbstract {
 
 	public void onOk(View view) {
 		ListAdapter adapter = fragment.getListAdapter();
+		new Assert(adapter != null); // can happen after rotation?
 		filter.setSenders(null);
 		boolean filterNothing = true;
 		for (int i = 0; i < adapter.getCount(); i++) {

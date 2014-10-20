@@ -96,14 +96,22 @@ public class Language {
 	}
 
 	public Locale getLocale() {
-		if (5 == language.length() && '-' == language.charAt(2)) {
-			return new Locale(language.substring(0, 2), language.substring(3, 5)); // TODO: RFC 3066 compliant? Check on server?
+		try {
+			Locale locale = null;
+			int index = language.indexOf("-");
+			if (index > 0) {
+				locale = new Locale(language.substring(0, index), language.substring(index + 1, language.length()));
+			}
+			else {
+				locale = new Locale(language);
+			}
+			@SuppressWarnings("unused") String testLanguage = locale.getDisplayLanguage();
+			@SuppressWarnings("unused") String testCountry = locale.getDisplayCountry();
+			return locale;
 		}
-		if ('-' == language.charAt(2)) {
-			return new Locale(language.substring(0, 2), language.substring(3, language.length())); // allow for variants such as 'es-419'
-		}
-		else {
-			return new Locale(language); // everything else?
+		catch (Exception e) {
+			Log.e("WTF? Language: " + language);
+			return Locale.getDefault();
 		}
 	}
 
