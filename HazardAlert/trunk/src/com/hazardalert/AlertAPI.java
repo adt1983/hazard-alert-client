@@ -23,10 +23,10 @@ public class AlertAPI {
 		service = new Alertendpoint(transport, jsonFactory, null);
 	}
 
-	/*
 	long serverTime() throws IOException {
 		return Long.parseLong(service.serverTime().execute().getValue());
-	}*/
+	}
+
 	AlertTransport alertFind(String fullName) throws IOException {
 		return service.alert().find().setFullName(fullName).execute();
 	}
