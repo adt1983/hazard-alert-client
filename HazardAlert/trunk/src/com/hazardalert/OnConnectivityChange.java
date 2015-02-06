@@ -20,8 +20,8 @@ public class OnConnectivityChange extends BroadcastReceiver {
 			}
 			else {
 				long now = new Date().getTime();
-				long lastSync = HazardAlert.getPreference(context, C.SP_SUBSCRIPTION_LAST_SYNC, now);
-				if (lastSync - now > 7 * C.ONE_HOUR_MS) {
+				long lastSync = HazardAlert.getPreference(context, C.SP_SUBSCRIPTION_LAST_SYNC, 0);
+				if (now - lastSync > 7 * C.ONE_HOUR_MS) {
 					context.startService(new Intent(context, OnUpdateSubscription.class));
 				}
 			}
