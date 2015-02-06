@@ -39,9 +39,11 @@ public class HazardTable extends SQLiteOpenHelper {
 
 	public static final String COLUMN_NOTIFY_ACTIVE = "notifyActive";
 
+	public static final String COLUMN_SHOWN = "shown";
+
 	private static final String DATABASE_NAME = "hazard.db";
 
-	private static final int DATABASE_VERSION = 12;
+	private static final int DATABASE_VERSION = 13;
 
 	public HazardTable(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -57,6 +59,7 @@ public class HazardTable extends SQLiteOpenHelper {
 				+ COLUMN_ALERT_FULL_NAME + " text not null, " /**/
 				+ "sourceUrl text, " /**/
 				+ "notifyActive integer not null, " /**/
+				+ COLUMN_SHOWN + " integer not null, " /**/
 				+ "bb_ne_lat real not null, " /**/
 				+ "bb_ne_lng real not null, " /**/
 				+ "bb_sw_lat real not null, " /**/

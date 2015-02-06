@@ -43,6 +43,8 @@ public class C {
 
 	public static final String SP_SUBSCRIPTION_ID = "SP_SUBSCRIPTION_ID";
 
+	public static final String SP_SUBSCRIPTION_LAST_SYNC = "SP_SUBSCRIPTION_LAST_SYNC";
+
 	/**
 	 * Common time values - WTF? Why aren't these inherited?
 	 */

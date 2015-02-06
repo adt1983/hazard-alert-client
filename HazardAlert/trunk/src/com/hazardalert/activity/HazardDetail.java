@@ -132,6 +132,7 @@ public class HazardDetail extends HazardAlertFragmentActivity {
 		((TextView) this.findViewById(R.id.alert_expires)).setText("Expires: " + h.getExpiresString());
 		((TextView) this.findViewById(R.id.alert_areadesc)).setText("Affected Area: " + area.getAreaDesc());
 		((TextView) this.findViewById(R.id.alert_sourceUrl)).setText("Original Source: " + h.getSourceUrl());
+		h.onShown(this);
 	}
 
 	private void setTextView(int id, Urgency urgency) {

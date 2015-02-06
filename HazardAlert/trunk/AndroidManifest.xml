@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hazardalert"
-    android:versionCode="23"
-    android:versionName="2015.01.25" >
+    android:versionCode="24"
+    android:versionName="2015.02.06" >
 
     <!-- Need SDK 8+ for GCM -->
     <!-- Need SDK 9+ for Strict Mode -->
@@ -55,6 +55,7 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
+        <receiver android:name="OnDeleteNotification" />
         <receiver
             android:name="com.google.android.gcm.GCMBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >

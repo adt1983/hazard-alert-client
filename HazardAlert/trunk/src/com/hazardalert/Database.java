@@ -126,11 +126,11 @@ public class Database {
 
 	// columns necessary to instantiate Hazard objects
 	private final String[] builderColumns = { HazardTable.COLUMN_ID, HazardTable.COLUMN_ALERT, HazardTable.COLUMN_SOURCE_URL,
-			HazardTable.COLUMN_VISIBLE, HazardTable.COLUMN_NOTIFY_ACTIVE };
+			HazardTable.COLUMN_VISIBLE, HazardTable.COLUMN_NOTIFY_ACTIVE, HazardTable.COLUMN_SHOWN };
 
 	private final String[] headerColumns = { HazardTable.COLUMN_ID, HazardTable.COLUMN_EXPIRES, HazardTable.COLUMN_ALERT_FULL_NAME,
 			HazardTable.COLUMN_BB_NE_LAT, HazardTable.COLUMN_BB_NE_LNG, HazardTable.COLUMN_BB_SW_LAT, HazardTable.COLUMN_BB_SW_LNG,
-			HazardTable.COLUMN_VISIBLE, HazardTable.COLUMN_NOTIFY_ACTIVE };
+			HazardTable.COLUMN_VISIBLE, HazardTable.COLUMN_NOTIFY_ACTIVE, HazardTable.COLUMN_SHOWN };
 
 	public static Hazard cursorToHazard(Cursor c) {
 		Hazard h = null;
@@ -146,6 +146,7 @@ public class Database {
 			h.db_id = c.getLong(c.getColumnIndexOrThrow(HazardTable.COLUMN_ID));
 			h.visible = (c.getInt(c.getColumnIndexOrThrow(HazardTable.COLUMN_VISIBLE)) == 1) ? true : false;
 			h.notifyActive = (c.getInt(c.getColumnIndexOrThrow(HazardTable.COLUMN_NOTIFY_ACTIVE)) == 1) ? true : false;
+			h.shown = (c.getInt(c.getColumnIndexOrThrow(HazardTable.COLUMN_SHOWN)) == 1) ? true : false;
 		}
 		catch (InvalidProtocolBufferException e) {
 			throw new RuntimeException(e);
@@ -158,6 +159,7 @@ public class Database {
 		h.db_id = c.getLong(c.getColumnIndexOrThrow(HazardTable.COLUMN_ID));
 		h.visible = (c.getInt(c.getColumnIndexOrThrow(HazardTable.COLUMN_VISIBLE)) == 1) ? true : false;
 		h.notifyActive = (c.getInt(c.getColumnIndexOrThrow(HazardTable.COLUMN_NOTIFY_ACTIVE)) == 1) ? true : false;
+		h.shown = (c.getInt(c.getColumnIndexOrThrow(HazardTable.COLUMN_SHOWN)) == 1) ? true : false;
 		return h;
 	}
 
@@ -179,6 +181,7 @@ public class Database {
 		values.put(HazardTable.COLUMN_BB_SW_LNG, h.bbSW.getLng());
 		values.put(HazardTable.COLUMN_VISIBLE, h.visible ? 1 : 0);
 		values.put(HazardTable.COLUMN_NOTIFY_ACTIVE, h.notifyActive ? 1 : 0);
+		values.put(HazardTable.COLUMN_SHOWN, h.shown ? 1 : 0);
 		values.put(HazardTable.COLUMN_STATUS, h.getAlert().getStatus().getNumber());
 		values.put(HazardTable.COLUMN_URGENCY, h.getInfo().getUrgency().getNumber());
 		values.put(HazardTable.COLUMN_SEVERITY, h.getInfo().getSeverity().getNumber());
