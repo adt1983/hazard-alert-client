@@ -1,5 +1,7 @@
 package com.hazardalert;
 
+import java.util.Date;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,9 +14,17 @@ public class OnConnectivityChange extends BroadcastReceiver {
 		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo ni = cm.getActiveNetworkInfo();
 		if (null != ni && NetworkInfo.State.CONNECTED == ni.getState()) {
-			OnUpdateSubscription.resetBackoff(context);
 			//new Assert(U.isNetworkAvailable(context)); can change back?
-			//context.startService(new Intent(context, OnUpdateSubscription.class));
+			if (OnUpdateSubscription.isRunning()) {
+				OnUpdateSubscription.resetBackoff(context);
+			}
+			else {
+				long now = new Date().getTime();
+				long lastSync = HazardAlert.getPreference(context, C.SP_SUBSCRIPTION_LAST_SYNC, now);
+				if (lastSync - now > 7 * C.ONE_HOUR_MS) {
+					context.startService(new Intent(context, OnUpdateSubscription.class));
+				}
+			}
 		}
 	}
 }

@@ -1,7 +1,6 @@
 package com.hazardalert;
 
 import java.io.IOException;
-import java.util.Date;
 
 import android.content.Context;
 import android.content.Intent;
@@ -71,7 +70,6 @@ public class GCMIntentService extends GCMBaseIntentService {
 	@Override
 	protected void onMessage(Context context, Intent intent) {
 		Log.v();
-		HazardAlert.setPreference(getApplicationContext(), "lastGCM", new Date().getTime());
 		for (long retryInterval = C.ONE_SECOND_MS;; retryInterval *= 2) {
 			AlertTransport alert = null;
 			try {
@@ -89,6 +87,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 			catch (IOException e) {
 				// retry on network related errors
 				if (retryInterval > C.ONE_HOUR_MS) {
+					// TODO: Start OnUpdateSubscription to pull Alert through sync?
 					throw new RuntimeException(e); // TODO handle with a pending request?
 				}
 				try {

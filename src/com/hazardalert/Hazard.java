@@ -48,7 +48,7 @@ public class Hazard {
 
 	public Point centroid;
 
-	public boolean shown; // has the alert been shown to the user
+	public boolean shown; // has the alert been shown to the user?
 
 	public boolean visible; // currently affects device
 
@@ -102,6 +102,7 @@ public class Hazard {
 		area = CommonUtil.cap_to_jts(alert); //TODO: switch to multi-polygon?
 		computeBoundingBox(); // TODO only need to do when saving to DB - does this belong here?
 		visible = false;
+		shown = false;
 		centroid = new Point(area.getCentroid());
 	}
 
@@ -267,7 +268,7 @@ public class Hazard {
 		/**/
 		final boolean allowNotif = HazardAlert.getPreferenceBoolean(ctx, C.PREF_NOTIF_ALLOW);
 		final boolean allowNotifSound = HazardAlert.getPreferenceBoolean(ctx, C.PREF_NOTIF_SOUND_ALLOW);
-		if (!allowNotif) {
+		if (!allowNotif || shown) {
 			return;
 		}
 		if (isSenderSuppressed(ctx)) {
@@ -277,9 +278,12 @@ public class Hazard {
 		if (Language.find(ctx, info0.getLanguage()).getSuppress()) {
 			return;
 		}
+		// http://stackoverflow.com/questions/13078230/notification-auto-cancel-does-not-call-deleteintent
+		final PendingIntent deleteIntent = PendingIntent.getBroadcast(ctx, 0, OnDeleteNotification.buildIntent(ctx, this), 0);
 		final NotificationManager mNM = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx).setSmallIcon(R.drawable.ic_hazardalert)
 																				.setAutoCancel(true)
+																				.setDeleteIntent(deleteIntent)
 																				.setContentTitle(info0.getEvent())
 																				.setContentText("Sev: " + info0.getSeverity() + " Urg: "
 																						+ info0.getUrgency());
@@ -319,6 +323,13 @@ public class Hazard {
 		Database db = Database.getInstance(ctx);
 		visible = false;
 		cancelNotify(ctx);
+		db.updateHazard(this);
+	}
+
+	public void onShown(Context ctx) {
+		Log.v("OnHazardShown: " + getFullName());
+		Database db = Database.getInstance(ctx);
+		shown = true;
 		db.updateHazard(this);
 	}
 

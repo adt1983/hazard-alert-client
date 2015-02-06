@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-import org.acra.ACRA;
-
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.PendingIntent;
@@ -56,7 +54,6 @@ public class OnUpdateSubscription extends IntentService {
 		try {
 			regId = gcm.register(C.SENDER_ID);
 			HazardAlert.setPreference(ctx, C.SP_GCM_REG_ID, regId);
-			HazardAlert.setPreference(ctx, "lastGCM", new Date().getTime());
 			Log.d("GCM Registration successful.");
 		}
 		catch (IOException e) {
@@ -96,8 +93,15 @@ public class OnUpdateSubscription extends IntentService {
 		setupRetry(ctx.getApplicationContext());
 	}
 
-	//TODO: Getting called too much from OnConnectiviyChange?
+	public static boolean isRunning() {
+		return running;
+	}
+
 	//FIXME: Server Subscription count != Install Base - need error checking?
+	/*
+	 * *#*#426#*#*
+	 * https://productforums.google.com/forum/#!topic/nexus/fslYqYrULto%5B1-25-false%5D
+	 */
 	private void updateSubscription() {
 		Log.d();
 		final Context ctx = getApplicationContext();
@@ -112,6 +116,14 @@ public class OnUpdateSubscription extends IntentService {
 		try {
 			if (0 != subId) {
 				s = alertAPI.subscriptionGet(subId);
+				if (null == s || null == s.getId()) {
+					HazardAlert.logException(ctx, new Exception("Server unable to find subscription. id: " + subId));
+				}
+				else {
+					if (0 != regId.compareTo(s.getGcm())) {
+						HazardAlert.logException(ctx, new Exception("Client GCM: " + regId + "\nServer GCM: " + s.getGcm()));
+					}
+				}
 			}
 			if (s == null || null == s.getId()) {
 				Log.v("Creating new subscription. {gcm: " + regId + "}");
@@ -125,15 +137,15 @@ public class OnUpdateSubscription extends IntentService {
 				Log.v("Updating subscription. {gcm: " + regId + "}");
 				s = new Subscription().setId(subId).setGcm(regId);
 				List<AlertTransport> newAlerts = alertAPI.updateSubscription(s, bounds.toEnvelope());
-				alertAPI.updateExpires(s, expires);
+				//alertAPI.updateExpires(s, expires);
 				db.insertAlerts(ctx, newAlerts);
 			}
+			HazardAlert.setPreference(ctx, C.SP_SUBSCRIPTION_LAST_SYNC, new Date().getTime());
 		}
 		catch (IOException e) {
 			Log.e("Unable to create/update subscription.", e);
-			//TODO seeing too many hits to server - whats going on?
-			ACRA.getErrorReporter().handleSilentException(e);
-			throw new RuntimeException();
+			HazardAlert.logException(ctx, e);
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -145,15 +157,3 @@ public class OnUpdateSubscription extends IntentService {
 		}
 	}
 }
-/*
- * // Restart GCM if we haven't heard from it in awhile
-	private void ensureGCM() {
-		final long MAX_GCM_IDLE = 3 * 60 * 60 * 1000; // 3 hours
-		if (MAX_GCM_IDLE < new Date().getTime() - HazardAlert.getPreference(getApplicationContext(), "lastGCM", 0)) {
-			HazardAlert.setPreference(getApplicationContext(), "lastGCM", new Date().getTime());
-			GCMRegistrar.unregister(getApplicationContext());
-			Intent registerGCM = new Intent(getApplicationContext(), OnRegisterGCM.class);
-			startService(registerGCM);
-		}
-	}
-	*/
