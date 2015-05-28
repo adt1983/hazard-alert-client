@@ -212,7 +212,7 @@ public class HazardDetail extends HazardAlertFragmentActivity {
 		List<ResolveInfo> handlers = getPackageManager().queryIntentActivities(sendIntent, 0);
 		final String hazardLink = h.getInfo().hasWeb() ? h.getInfo().getWeb() : h.getSourceUrl();
 		final String appLink = "https://play.google.com/store/apps/details?id=com.hazardalert";
-		final String linkText = info.getEvent() + " (" + hazardLink + ") via Hazard Alert (" + appLink + ")";
+		final String linkText = info.getEvent() + " " + hazardLink + " via Hazard Alert " + appLink;
 		final String linkHtml = "<a href=\"" + hazardLink + "\">" + h.getInfo().getEvent() + "</a> via <a href=\"" + appLink
 				+ "\">Hazard Alert</a>";
 		for (ResolveInfo ri : handlers) {
