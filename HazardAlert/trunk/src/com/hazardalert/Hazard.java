@@ -199,6 +199,11 @@ public class Hazard {
 				c.getNumber() >= info0.getCertainty().getNumber();
 	}
 
+	public boolean exceedsThreshold(Hazard rhs) {
+		Info rhsInfo = rhs.getAlert().getInfo(0);
+		return exceedsThreshold(rhsInfo.getUrgency(), rhsInfo.getSeverity(), rhsInfo.getCertainty());
+	}
+
 	public boolean contains(com.hazardalert.common.Point point) {
 		for (int i = 0; i < area.getNumGeometries(); i++) {
 			if (area.getGeometryN(i).contains(point.toPointJTS())) {
@@ -262,6 +267,21 @@ public class Hazard {
 		}
 	}
 
+	public boolean isLikelyDuplicate(Hazard rhs) {
+		if (!getAlert().getSender().equals(rhs.getAlert().getSender())) {
+			return false;
+		}
+		Info a = getAlert().getInfo(0);
+		Info b = rhs.getAlert().getInfo(0);
+		if (!a.getHeadline().equals(b.getHeadline())) {
+			return false;
+		}
+		if (a.getSeverity().ordinal() < b.getSeverity().ordinal()) { // Reverse ordering
+			return false;
+		}
+		return true;
+	}
+
 	public void onEnter(Context ctx) {
 		Log.v("OnHazardEnter: " + getFullName());
 		Database db = Database.getInstance(ctx);
@@ -277,6 +297,17 @@ public class Hazard {
 		Info info0 = getAlert().getInfo(0);
 		if (Language.find(ctx, info0.getLanguage()).getSuppress()) {
 			return;
+		}
+		// Reduce update spam
+		if (info0.getSeverity().ordinal() != Severity.EXTREME_VALUE) {
+			for (Hazard h : db.getHazardActive(U.getLastLocation(ctx))) {
+				if (db_id == h.db_id) {
+					continue;
+				}
+				if ((h.shown || h.notifyActive) && isLikelyDuplicate(h)) {
+					return;
+				}
+			}
 		}
 		// http://stackoverflow.com/questions/13078230/notification-auto-cancel-does-not-call-deleteintent
 		final PendingIntent deleteIntent = PendingIntent.getBroadcast(ctx, 0, OnDeleteNotification.buildIntent(ctx, this), 0);
