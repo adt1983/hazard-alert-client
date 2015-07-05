@@ -29,6 +29,7 @@ import com.google.publicalerts.cap.Alert.MsgType;
 import com.hazardalert.common.AlertFilter;
 import com.hazardalert.common.Assert;
 import com.hazardalert.common.Bounds;
+import com.hazardalert.common.Point;
 import com.j256.ormlite.dao.Dao;
 
 // TODO pathological coupling with HazardTable - needs to be a better pattern for this. ORMLite?
@@ -384,6 +385,10 @@ public class Database {
 		return exiting;
 	}
 
+	public List<Hazard> getHazardActive(Point loc) {
+		return list(new AlertFilter().setLocation(loc));
+	}
+
 	String addBounds(Bounds b, List<String> args) {
 		String sql = "(bb_ne_lng > ?) AND (bb_ne_lat > ?) AND (bb_sw_lng < ?) AND (bb_sw_lat < ?)";
 		args.add(Double.toString(b.getSw_lng()));
@@ -396,6 +401,9 @@ public class Database {
 	public List<Hazard> list(AlertFilter filter) {
 		ArrayList<String> strings = new ArrayList<String>();
 		String sql = "1 = 1";
+		if (null != filter.getLocation()) {
+			filter.setInclude(new Bounds(filter.getLocation(), 0.25)); // Find everything within .25km then post-process
+		}
 		if (null != filter.getInclude()) {
 			Bounds b = filter.getInclude();
 			if (!b.spansAntiMeridian()) {
@@ -477,6 +485,13 @@ public class Database {
 					if (!haz.intersects(split[0].toEnvelope()) && !haz.intersects(split[1].toEnvelope())) {
 						h.remove();
 					}
+				}
+			}
+		}
+		if (null != filter.getLocation()) {
+			for (Iterator<Hazard> h = results.iterator(); h.hasNext();) {
+				if (!h.next().contains(filter.getLocation())) {
+					h.remove();
 				}
 			}
 		}
